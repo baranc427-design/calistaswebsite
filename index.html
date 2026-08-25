@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vector Musica | Project Hub</title>
+  <title>Cherry Blossom | Project Portfolio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #0b0712;
-      --card-bg: rgba(22, 15, 36, 0.7);
-      --accent-gold: #f3ce7b;
-      --accent-magenta: #e04285;
-      --accent-cyan: #4bc0c8;
-      --text-light: #f4effa;
-      --text-dim: #a59ab2;
+      --bg-color: #fdf8f9;
+      --card-bg: rgba(255, 255, 255, 0.75);
+      --primary-pink: #e899ac;
+      --deep-rose: #b85b75;
+      --soft-blush: #fceef2;
+      --sage-green: #8a9a86;
+      --text-main: #4a3e43;
+      --text-muted: #7d6e75;
     }
 
     * {
@@ -26,17 +27,17 @@
 
     body {
       background-color: var(--bg-color);
-      color: var(--text-light);
+      color: var(--text-main);
       font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(224, 66, 133, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(75, 192, 200, 0.15) 0%, transparent 40%);
+        radial-gradient(circle at 15% 15%, rgba(232, 153, 172, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(252, 238, 242, 0.8) 0%, transparent 50%);
     }
 
-    /* SVG Floral & Musical Background Overlay */
-    .bg-flourish {
+    /* SVG Cherry Blossom Background Decorative Layer */
+    .bg-blooms {
       position: fixed;
       top: 0;
       left: 0;
@@ -44,53 +45,53 @@
       height: 100%;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.25;
+      opacity: 0.4;
     }
 
     header {
       position: relative;
       z-index: 1;
       text-align: center;
-      padding: 5rem 1rem 3rem;
+      padding: 5rem 1rem 2.5rem;
     }
 
     h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 3rem;
-      letter-spacing: 4px;
-      background: linear-gradient(135deg, var(--accent-gold), var(--accent-magenta));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      font-weight: 600;
+      color: var(--deep-rose);
+      letter-spacing: -0.5px;
       margin-bottom: 0.5rem;
     }
 
     .subtitle {
-      color: var(--text-dim);
-      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-size: 1.05rem;
       letter-spacing: 2px;
       text-transform: uppercase;
+      font-weight: 500;
     }
 
-    /* Decorative Staff Line Divider */
-    .staff-divider {
+    /* Blossom Divider */
+    .divider {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 15px;
-      margin: 2rem 0;
+      gap: 12px;
+      margin: 1.8rem 0;
     }
 
-    .staff-line {
+    .divider-line {
       height: 1px;
-      width: 100px;
-      background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+      width: 80px;
+      background: linear-gradient(90deg, transparent, var(--primary-pink), transparent);
     }
 
     /* Project Grid */
     main {
       position: relative;
       z-index: 1;
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 2rem 5rem;
     }
@@ -103,116 +104,109 @@
 
     .card {
       background: var(--card-bg);
-      border: 1px solid rgba(243, 206, 123, 0.2);
-      border-radius: 12px;
-      padding: 2rem;
-      backdrop-filter: blur(10px);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid rgba(232, 153, 172, 0.3);
+      border-radius: 16px;
+      padding: 2.2rem 2rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(232, 153, 172, 0.08);
+      transition: all 0.35s ease;
       position: relative;
       overflow: hidden;
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent-magenta), var(--accent-cyan));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
     .card:hover {
-      transform: translateY(-8px);
-      border-color: rgba(243, 206, 123, 0.6);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(224, 66, 133, 0.2);
-    }
-
-    .card:hover::before {
-      opacity: 1;
+      transform: translateY(-6px);
+      border-color: var(--primary-pink);
+      box-shadow: 0 14px 36px rgba(184, 91, 117, 0.12);
     }
 
     .card-icon {
-      width: 40px;
-      height: 40px;
-      margin-bottom: 1rem;
-      fill: var(--accent-gold);
+      width: 36px;
+      height: 36px;
+      margin-bottom: 1.2rem;
+      fill: var(--deep-rose);
     }
 
     .card h2 {
-      font-family: 'Cinzel', serif;
-      font-size: 1.4rem;
-      color: var(--text-light);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--deep-rose);
       margin-bottom: 0.75rem;
     }
 
     .card p {
-      color: var(--text-dim);
+      color: var(--text-muted);
       font-size: 0.95rem;
-      line-height: 1.6;
+      line-height: 1.65;
       margin-bottom: 1.5rem;
     }
 
     .card-link {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      color: var(--accent-cyan);
+      gap: 6px;
+      color: var(--deep-rose);
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 500;
       font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: color 0.2s ease;
+      transition: gap 0.2s ease, color 0.2s ease;
     }
 
     .card-link:hover {
-      color: var(--accent-gold);
+      color: var(--primary-pink);
+      gap: 10px;
     }
 
     footer {
       position: relative;
       z-index: 1;
       text-align: center;
-      padding: 2rem;
-      color: var(--text-dim);
+      padding: 2.5rem;
+      color: var(--text-muted);
       font-size: 0.85rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(232, 153, 172, 0.2);
     }
   </style>
 </head>
 <body>
 
-  <svg class="bg-flourish" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
-    <g stroke="url(#flourish-grad)" stroke-width="1.5" fill="none" opacity="0.8">
-      <path d="M 100 200 C 150 100, 250 100, 200 250 C 150 400, 300 450, 400 300 C 500 150, 350 50, 250 150 S 100 500, 300 650" />
-      <path d="M 700 600 C 650 700, 550 700, 600 550 C 650 400, 500 350, 400 500 C 300 650, 450 750, 550 650 S 700 300, 500 150" />
-      <path d="M 650 150 Q 700 250 600 350 T 500 550" stroke-dasharray="4 4" />
-      <circle cx="200" cy="250" r="4" fill="#f3ce7b" />
-      <circle cx="600" cy="550" r="4" fill="#e04285" />
-      <circle cx="400" cy="300" r="3" fill="#4bc0c8" />
+  <svg class="bg-blooms" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+    <g transform="translate(550, -50)">
+      <path d="M 50 0 C 100 150, 200 200, 300 250 M 170 185 C 130 220, 90 260, 50 300" stroke="#8a9a86" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <g transform="translate(170, 185)">
+        <circle cx="0" cy="0" r="12" fill="#e899ac" opacity="0.8"/>
+        <circle cx="-10" cy="-8" r="10" fill="#fceef2"/>
+        <circle cx="10" cy="-8" r="10" fill="#fceef2"/>
+        <circle cx="12" cy="6" r="10" fill="#fceef2"/>
+        <circle cx="-12" cy="6" r="10" fill="#fceef2"/>
+        <circle cx="0" cy="12" r="10" fill="#fceef2"/>
+        <circle cx="0" cy="0" r="3" fill="#b85b75"/>
+      </g>
+      <g transform="translate(100, 250)">
+        <circle cx="-8" cy="-6" r="8" fill="#fceef2"/>
+        <circle cx="8" cy="-6" r="8" fill="#fceef2"/>
+        <circle cx="10" cy="4" r="8" fill="#fceef2"/>
+        <circle cx="-10" cy="4" r="8" fill="#fceef2"/>
+        <circle cx="0" cy="9" r="8" fill="#fceef2"/>
+        <circle cx="0" cy="0" r="2.5" fill="#b85b75"/>
+      </g>
     </g>
-    <defs>
-      <linearGradient id="flourish-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#e04285" />
-        <stop offset="50%" stop-color="#f3ce7b" />
-        <stop offset="100%" stop-color="#4bc0c8" />
-      </linearGradient>
-    </defs>
+    <path d="M 120 200 Q 130 210 125 225 Q 110 220 120 200 Z" fill="#e899ac" opacity="0.6"/>
+    <path d="M 250 500 Q 265 515 255 530 Q 240 525 250 500 Z" fill="#e899ac" opacity="0.5" transform="rotate(25 250 500)"/>
+    <path d="M 680 620 Q 695 635 685 650 Q 670 645 680 620 Z" fill="#e899ac" opacity="0.7" transform="rotate(-40 680 620)"/>
   </svg>
 
   <header>
-    <h1>ALEXANDER VANCE</h1>
-    <p class="subtitle">Compositions &amp; Digital Works</p>
+    <h1>Sakura &amp; Bloom</h1>
+    <p class="subtitle">Creative Projects &amp; Digital Works</p>
     
-    <div class="staff-divider">
-      <div class="staff-line"></div>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="#f3ce7b">
-        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b85b75" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 5a3.5 3.5 0 0 0 0 7 3.5 3.5 0 0 0 0-7zM19 12a3.5 3.5 0 0 0-7 0 3.5 3.5 0 0 0 7 0zM12 19a3.5 3.5 0 0 0 0-7 3.5 3.5 0 0 0 0 7zM5 12a3.5 3.5 0 0 0 7 0 3.5 3.5 0 0 0-7 0z"/>
       </svg>
-      <div class="staff-line"></div>
+      <div class="divider-line"></div>
     </div>
   </header>
 
@@ -220,35 +214,35 @@
     <div class="grid">
       <article class="card">
         <svg class="card-icon" viewBox="0 0 24 24">
+          <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"/>
+        </svg>
+        <h2>Botanical Journal</h2>
+        <p>A web application for tracking plant growth, care schedules, and seasonal blooms with integrated floral illustrations.</p>
+        <a href="#" class="card-link">View Project &rarr;</a>
+      </article>
+
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24">
           <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
         </svg>
-        <h2>Symphonic Code</h2>
-        <p>An interactive audio visualizer built with Web Audio API that transforms real-time algorithmic inputs into dynamic floral vector art.</p>
-        <a href="#" class="card-link">Explore Project &rarr;</a>
+        <h2>Petal Audio Visualizer</h2>
+        <p>An interactive canvas experiment rendering organic cherry blossom petal animations synchronized to ambient music tracks.</p>
+        <a href="#" class="card-link">Listen &amp; View &rarr;</a>
       </article>
 
       <article class="card">
         <svg class="card-icon" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+          <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
         </svg>
-        <h2>Nocturne in C#</h2>
-        <p>A generative ambient soundscape generator created for immersive work sessions, using procedural synthesis and custom spatial reverb.</p>
-        <a href="#" class="card-link">Listen Now &rarr;</a>
-      </article>
-
-      <article class="card">
-        <svg class="card-icon" viewBox="0 0 24 24">
-          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-        </svg>
-        <h2>Cadence Design System</h2>
-        <p>A UI component library designed with musical cadence in mind, featuring graceful transitions, rhythmic layouts, and vector flourish elements.</p>
-        <a href="#" class="card-link">View Documentation &rarr;</a>
+        <h2>Hana Design Tokens</h2>
+        <p>A lightweight CSS design token system inspired by soft floral color palettes, elegant serif typography, and natural curves.</p>
+        <a href="#" class="card-link">Read Docs &rarr;</a>
       </article>
     </div>
   </main>
 
   <footer>
-    <p>&copy; 2026 Alexander Vance. Designed with Vector Musica Aesthetic.</p>
+    <p>&copy; 2026 Designed with a Cherry Blossom Aesthetic.</p>
   </footer>
 
 </body>
