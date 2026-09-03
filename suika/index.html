@@ -2,149 +2,531 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>JS Suika Game</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherry Blossom | Project Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    body {
-      background: #f7f4ea;
+    :root {
+      --bg-color: #fdf8f9;
+      --card-bg: rgba(255, 255, 255, 0.75);
+      --primary-pink: #e899ac;
+      --deep-rose: #b85b75;
+      --soft-blush: #fceef2;
+      --sage-green: #8a9a86;
+      --text-main: #4a3e43;
+      --text-muted: #7d6e75;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(232, 153, 172, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(252, 238, 242, 0.8) 0%, transparent 50%);
+    }
+
+    /* SVG Cherry Blossom Background Decorative Layer */
+    .bg-blooms {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 5rem 1rem 2.5rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      font-weight: 600;
+      color: var(--deep-rose);
+      letter-spacing: -0.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* Blossom Divider */
+    .divider {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin: 1.8rem 0;
+    }
+
+    .divider-line {
+      height: 1px;
+      width: 80px;
+      background: linear-gradient(90deg, transparent, var(--primary-pink), transparent);
+    }
+
+    /* Project Grid */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem 5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(232, 153, 172, 0.3);
+      border-radius: 16px;
+      padding: 2.2rem 2rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(232, 153, 172, 0.08);
+      transition: all 0.35s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: var(--primary-pink);
+      box-shadow: 0 14px 36px rgba(184, 91, 117, 0.12);
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 1.2rem;
+      fill: var(--deep-rose);
+    }
+
+    .card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--deep-rose);
+      margin-bottom: 0.75rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--deep-rose);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: gap 0.2s ease, color 0.2s ease;
+    }
+
+    .card-link:hover {
+      color: var(--primary-pink);
+      gap: 10px;
+    }
+
+    /* Suika Game Styles */
+    .suika-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-family: sans-serif;
+      margin-top: 1rem;
     }
-    #score {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #4a3b32;
+
+    .suika-stats {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 280px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--deep-rose);
     }
-    canvas {
-      border: 4px solid #4a3b32;
-      background: #fffef0;
-      border-radius: 4px;
+
+    #suikaCanvas {
+      background: #ffffff;
+      border: 2px solid var(--primary-pink);
+      border-radius: 12px;
+      cursor: pointer;
+      touch-action: none;
+      box-shadow: inset 0 0 10px rgba(232, 153, 172, 0.15);
+    }
+
+    .suika-reset-btn {
+      margin-top: 0.8rem;
+      padding: 0.4rem 1rem;
+      background-color: var(--deep-rose);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .suika-reset-btn:hover {
+      background-color: var(--primary-pink);
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(232, 153, 172, 0.2);
     }
   </style>
 </head>
 <body>
 
-<div id="score">Score: 0</div>
+  <svg class="bg-blooms" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+    <g transform="translate(550, -50)">
+      <path d="M 50 0 C 100 150, 200 200, 300 250 M 170 185 C 130 220, 90 260, 50 300" stroke="#8a9a86" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <g transform="translate(170, 185)">
+        <circle cx="0" cy="0" r="12" fill="#e899ac" opacity="0.8"/>
+        <circle cx="-10" cy="-8" r="10" fill="#fceef2"/>
+        <circle cx="10" cy="-8" r="10" fill="#fceef2"/>
+        <circle cx="12" cy="6" r="10" fill="#fceef2"/>
+        <circle cx="-12" cy="6" r="10" fill="#fceef2"/>
+        <circle cx="0" cy="12" r="10" fill="#fceef2"/>
+        <circle cx="0" cy="0" r="3" fill="#b85b75"/>
+      </g>
+      <g transform="translate(100, 250)">
+        <circle cx="-8" cy="-6" r="8" fill="#fceef2"/>
+        <circle cx="8" cy="-6" r="8" fill="#fceef2"/>
+        <circle cx="10" cy="4" r="8" fill="#fceef2"/>
+        <circle cx="-10" cy="4" r="8" fill="#fceef2"/>
+        <circle cx="0" cy="9" r="8" fill="#fceef2"/>
+        <circle cx="0" cy="0" r="2.5" fill="#b85b75"/>
+      </g>
+    </g>
+    <path d="M 120 200 Q 130 210 125 225 Q 110 220 120 200 Z" fill="#e899ac" opacity="0.6"/>
+    <path d="M 250 500 Q 265 515 255 530 Q 240 525 250 500 Z" fill="#e899ac" opacity="0.5" transform="rotate(25 250 500)"/>
+    <path d="M 680 620 Q 695 635 685 650 Q 670 645 680 620 Z" fill="#e899ac" opacity="0.7" transform="rotate(-40 680 620)"/>
+  </svg>
 
-<script>
-const { Engine, Render, Runner, Bodies, Composite, Events, World } = Matter;
+  <header>
+    <h1>Sakura &amp; Bloom</h1>
+    <p class="subtitle">Creative Projects &amp; Digital Works</p>
+    
+    <div class="divider">
+      <div class="divider-line"></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b85b75" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 5a3.5 3.5 0 0 0 0 7 3.5 3.5 0 0 0 0-7zM19 12a3.5 3.5 0 0 0-7 0 3.5 3.5 0 0 0 7 0zM12 19a3.5 3.5 0 0 0 0-7 3.5 3.5 0 0 0 0 7zM5 12a3.5 3.5 0 0 0 7 0 3.5 3.5 0 0 0-7 0z"/>
+      </svg>
+      <div class="divider-line"></div>
+    </div>
+  </header>
 
-// Game Configuration
-const WIDTH = 450;
-const HEIGHT = 600;
-let score = 0;
-let canDrop = true;
+  <main>
+    <div class="grid">
 
-// Fruit Tiers (Radius, Color, Points)
-const FRUITS = [
-  { radius: 15, color: '#e74c3c', score: 2 },   // Cherry
-  { radius: 25, color: '#e67e22', score: 4 },   // Strawberry
-  { radius: 35, color: '#9b59b6', score: 8 },   // Grape
-  { radius: 45, color: '#f1c40f', score: 12 },  // Dekopon
-  { radius: 55, color: '#e67e22', score: 16 },  // Orange
-  { radius: 70, color: '#2ecc71', score: 20 },  // Apple
-  { radius: 85, color: '#1abc9c', score: 26 },  // Pear
-  { radius: 100, color: '#f39c12', score: 32 }, // Peach
-  { radius: 115, color: '#d35400', score: 40 }, // Pineapple
-  { radius: 130, color: '#27ae60', score: 50 }  // Watermelon
-];
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24">
+          <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 1c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+        </svg>
+        <h2>Suika Game</h2>
+        <p>Drop and merge matching fruits to create larger ones and earn points. Don't let the container overflow!</p>
+        
+        <div class="suika-wrapper">
+          <div class="suika-stats">
+            <span>Score: <strong id="suikaScore">0</strong></span>
+            <span>Next: <strong id="suikaNext">🍒</strong></span>
+          </div>
+          <canvas id="suikaCanvas" width="280" height="380"></canvas>
+          <button class="suika-reset-btn" id="suikaReset">Reset Game</button>
+        </div>
+      </article>
 
-let currentFruitIndex = getRandomFruitIndex();
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24">
+          <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"/>
+        </svg>
+        <h2>Botanical Journal</h2>
+        <p>A web application for tracking plant growth, care schedules, and seasonal blooms with integrated floral illustrations.</p>
+        <a href="#" class="card-link">View Project &rarr;</a>
+      </article>
 
-// Engine Setup
-const engine = Engine.create();
-const render = Render.create({
-  element: document.body,
-  engine: engine,
-  options: {
-    width: WIDTH,
-    height: HEIGHT,
-    wireframes: false,
-    background: '#fffef0'
-  }
-});
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24">
+          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+        </svg>
+        <h2>Petal Audio Visualizer</h2>
+        <p>An interactive canvas experiment rendering organic cherry blossom petal animations synchronized to ambient music tracks.</p>
+        <a href="#" class="card-link">Listen &amp; View &rarr;</a>
+      </article>
 
-// Walls
-const ground = Bodies.rectangle(WIDTH / 2, HEIGHT + 30, WIDTH, 80, { isStatic: true });
-const leftWall = Bodies.rectangle(-30, HEIGHT / 2, 80, HEIGHT, { isStatic: true });
-const rightWall = Bodies.rectangle(WIDTH + 30, HEIGHT / 2, 80, HEIGHT, { isStatic: true });
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24">
+          <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+        </svg>
+        <h2>Hana Design Tokens</h2>
+        <p>A lightweight CSS design token system inspired by soft floral color palettes, elegant serif typography, and natural curves.</p>
+        <a href="#" class="card-link">Read Docs &rarr;</a>
+      </article>
 
-World.add(engine.world, [ground, leftWall, rightWall]);
+    </div>
+  </main>
 
-Render.run(render);
-Runner.run(Runner.create(), engine);
+  <footer>
+    <p>&copy; 2026 Designed with a Cherry Blossom Aesthetic.</p>
+  </footer>
 
-function getRandomFruitIndex() {
-  // Only spawn smaller fruits (tiers 0 to 4)
-  return Math.floor(Math.random() * 5);
-}
+  <script>
+    const canvas = document.getElementById('suikaCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('suikaScore');
+    const nextEl = document.getElementById('suikaNext');
+    const resetBtn = document.getElementById('suikaReset');
 
-function createFruit(x, y, index, isStatic = false) {
-  const fruit = FRUITS[index];
-  const body = Bodies.circle(x, y, fruit.radius, {
-    isStatic: isStatic,
-    restitution: 0.3,
-    friction: 0.1,
-    render: { fillStyle: fruit.color }
-  });
-  body.fruitIndex = index;
-  return body;
-}
+    const FRUITS = [
+      { name: 'Cherry', radius: 10, points: 2, icon: '🍒' },
+      { name: 'Strawberry', radius: 15, points: 4, icon: '🍓' },
+      { name: 'Grape', radius: 20, points: 6, icon: '🍇' },
+      { name: 'Orange', radius: 26, points: 10, icon: '🍊' },
+      { name: 'Persimmon', radius: 32, points: 15, icon: '🍎' },
+      { name: 'Apple', radius: 40, points: 20, icon: '🍏' },
+      { name: 'Pear', radius: 48, points: 28, icon: '🍐' },
+      { name: 'Peach', radius: 56, points: 36, icon: '🍑' },
+      { name: 'Pineapple', radius: 66, points: 45, icon: '🍍' },
+      { name: 'Melon', radius: 76, points: 60, icon: '🍈' },
+      { name: 'Watermelon', radius: 88, points: 80, icon: '🍉' }
+    ];
 
-// Drop controls
-window.addEventListener('click', (e) => {
-  if (!canDrop) return;
+    let score = 0;
+    let fruits = [];
+    let currentTier = 0;
+    let nextTier = 0;
+    let dropX = canvas.width / 2;
+    let canDrop = true;
+    let gameOver = false;
 
-  const rect = render.canvas.getBoundingClientRect();
-  let x = e.clientX - rect.left;
-  
-  // Keep fruit inside container boundaries
-  const radius = FRUITS[currentFruitIndex].radius;
-  x = Math.max(radius, Math.min(WIDTH - radius, x));
-
-  const fruit = createFruit(x, 50, currentFruitIndex);
-  World.add(engine.world, fruit);
-
-  canDrop = false;
-  currentFruitIndex = getRandomFruitIndex();
-
-  setTimeout(() => { canDrop = true; }, 600);
-});
-
-// Collision Handling (Merging)
-Events.on(engine, 'collisionStart', (event) => {
-  event.pairs.forEach((collision) => {
-    const { bodyA, bodyB } = collision;
-
-    if (
-      bodyA.fruitIndex !== undefined &&
-      bodyB.fruitIndex !== undefined &&
-      bodyA.fruitIndex === bodyB.fruitIndex
-    ) {
-      const currentIndex = bodyA.fruitIndex;
-
-      // Do not merge top-tier fruit
-      if (currentIndex >= FRUITS.length - 1) return;
-
-      World.remove(engine.world, [bodyA, bodyB]);
-
-      // Midpoint position for new merged fruit
-      const newX = (bodyA.position.x + bodyB.position.x) / 2;
-      const newY = (bodyA.position.y + bodyB.position.y) / 2;
-
-      const newFruit = createFruit(newX, newY, currentIndex + 1);
-      World.add(engine.world, newFruit);
-
-      score += FRUITS[currentIndex + 1].score;
-      document.getElementById('score').innerText = `Score: ${score}`;
+    function initGame() {
+      score = 0;
+      fruits = [];
+      gameOver = false;
+      canDrop = true;
+      scoreEl.textContent = score;
+      currentTier = Math.floor(Math.random() * 4);
+      nextTier = Math.floor(Math.random() * 4);
+      nextEl.textContent = FRUITS[nextTier].icon;
     }
-  });
-});
-</script>
+
+    class Fruit {
+      constructor(x, y, tier) {
+        this.x = x;
+        this.y = y;
+        this.tier = tier;
+        this.radius = FRUITS[tier].radius;
+        this.vx = 0;
+        this.vy = 0;
+      }
+
+      update() {
+        this.vy += 0.25; // Gravity
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= 0.98; // Friction
+
+        // Bottom boundary
+        if (this.y + this.radius > canvas.height) {
+          this.y = canvas.height - this.radius;
+          this.vy *= -0.2;
+          this.vx *= 0.9;
+        }
+
+        // Left/Right boundaries
+        if (this.x - this.radius < 0) {
+          this.x = this.radius;
+          this.vx *= -0.3;
+        }
+        if (this.x + this.radius > canvas.width) {
+          this.x = canvas.width - this.radius;
+          this.vx *= -0.3;
+        }
+      }
+
+      draw() {
+        ctx.font = `${this.radius * 1.3}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(FRUITS[this.tier].icon, this.x, this.y);
+      }
+    }
+
+    function handleCollisions() {
+      for (let i = 0; i < fruits.length; i++) {
+        for (let j = i + 1; j < fruits.length; j++) {
+          let a = fruits[i];
+          let b = fruits[j];
+
+          let dx = b.x - a.x;
+          let dy = b.y - a.y;
+          let dist = Math.hypot(dx, dy);
+          let minDist = a.radius + b.radius;
+
+          if (dist < minDist) {
+            // Merge condition
+            if (a.tier === b.tier && a.tier < FRUITS.length - 1) {
+              const newTier = a.tier + 1;
+              const newX = (a.x + b.x) / 2;
+              const newY = (a.y + b.y) / 2;
+
+              fruits.splice(j, 1);
+              fruits.splice(i, 1);
+
+              score += FRUITS[newTier].points;
+              scoreEl.textContent = score;
+
+              fruits.push(new Fruit(newX, newY, newTier));
+              return;
+            }
+
+            // Simple elasticity displacement
+            let overlap = minDist - dist;
+            let nx = dx / (dist || 1);
+            let ny = dy / (dist || 1);
+
+            a.x -= nx * overlap * 0.5;
+            a.y -= ny * overlap * 0.5;
+            b.x += nx * overlap * 0.5;
+            b.y += ny * overlap * 0.5;
+
+            a.vx -= nx * 0.05;
+            a.vy -= ny * 0.05;
+            b.vx += nx * 0.05;
+            b.vy += ny * 0.05;
+          }
+        }
+      }
+    }
+
+    function checkGameOver() {
+      for (let f of fruits) {
+        if (f.y - f.radius < 35 && Math.abs(f.vy) < 0.2) {
+          gameOver = true;
+        }
+      }
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Overflow line
+      ctx.beginPath();
+      ctx.moveTo(0, 35);
+      ctx.lineTo(canvas.width, 35);
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#e899ac';
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Drop aim line & preview icon
+      if (canDrop && !gameOver) {
+        ctx.beginPath();
+        ctx.moveTo(dropX, 35);
+        ctx.lineTo(dropX, canvas.height);
+        ctx.strokeStyle = 'rgba(232, 153, 172, 0.25)';
+        ctx.stroke();
+
+        ctx.font = `${FRUITS[currentTier].radius * 1.3}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(FRUITS[currentTier].icon, dropX, 20);
+      }
+
+      // Render fruits
+      for (let f of fruits) {
+        f.update();
+        f.draw();
+      }
+
+      handleCollisions();
+      checkGameOver();
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(253, 248, 249, 0.85)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#b85b75';
+        ctx.font = '600 20px Playfair Display, serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = '14px Plus Jakarta Sans, sans-serif';
+        ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 15);
+      } else {
+        requestAnimationFrame(render);
+      }
+    }
+
+    // Input Events
+    canvas.addEventListener('pointermove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      dropX = Math.max(15, Math.min(canvas.width - 15, e.clientX - rect.left));
+    });
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (!canDrop || gameOver) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.max(15, Math.min(canvas.width - 15, e.clientX - rect.left));
+
+      fruits.push(new Fruit(x, 25, currentTier));
+      canDrop = false;
+
+      setTimeout(() => {
+        currentTier = nextTier;
+        nextTier = Math.floor(Math.random() * 4);
+        nextEl.textContent = FRUITS[nextTier].icon;
+        canDrop = true;
+      }, 400);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      initGame();
+      render();
+    });
+
+    initGame();
+    render();
+  </script>
 </body>
 </html>
