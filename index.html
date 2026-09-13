@@ -61,15 +61,6 @@
       font-weight: 600;
       color: var(--deep-rose);
       letter-spacing: -0.5px;
-      margin-bottom: 0.5rem;
-    }
-
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-weight: 500;
     }
 
     /* Blossom Divider */
@@ -112,6 +103,8 @@
       transition: all 0.35s ease;
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .card:hover {
@@ -139,6 +132,7 @@
       font-size: 0.95rem;
       line-height: 1.65;
       margin-bottom: 1.5rem;
+      flex-grow: 1;
     }
 
     .card-link {
@@ -150,11 +144,41 @@
       font-weight: 500;
       font-size: 0.9rem;
       transition: gap 0.2s ease, color 0.2s ease;
+      align-self: flex-start;
     }
 
     .card-link:hover {
       color: var(--primary-pink);
       gap: 10px;
+    }
+
+    /* Placeholder Card Styling for Future Projects */
+    .card.placeholder {
+      border: 2px dashed rgba(232, 153, 172, 0.4);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .card.placeholder .card-icon {
+      fill: var(--primary-pink);
+      opacity: 0.6;
+    }
+
+    .card.placeholder h2 {
+      color: var(--text-muted);
+    }
+
+    .card.placeholder p {
+      font-style: italic;
+      color: #a3959c;
+    }
+
+    .card-status {
+      display: inline-block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sage-green);
+      font-weight: 600;
     }
 
     footer {
@@ -170,6 +194,7 @@
 </head>
 <body>
 
+  <!-- Background Petals -->
   <svg class="bg-blooms" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
     <g transform="translate(550, -50)">
       <path d="M 50 0 C 100 150, 200 200, 300 250 M 170 185 C 130 220, 90 260, 50 300" stroke="#8a9a86" stroke-width="3" fill="none" stroke-linecap="round"/>
@@ -182,23 +207,13 @@
         <circle cx="0" cy="12" r="10" fill="#fceef2"/>
         <circle cx="0" cy="0" r="3" fill="#b85b75"/>
       </g>
-      <g transform="translate(100, 250)">
-        <circle cx="-8" cy="-6" r="8" fill="#fceef2"/>
-        <circle cx="8" cy="-6" r="8" fill="#fceef2"/>
-        <circle cx="10" cy="4" r="8" fill="#fceef2"/>
-        <circle cx="-10" cy="4" r="8" fill="#fceef2"/>
-        <circle cx="0" cy="9" r="8" fill="#fceef2"/>
-        <circle cx="0" cy="0" r="2.5" fill="#b85b75"/>
-      </g>
     </g>
     <path d="M 120 200 Q 130 210 125 225 Q 110 220 120 200 Z" fill="#e899ac" opacity="0.6"/>
     <path d="M 250 500 Q 265 515 255 530 Q 240 525 250 500 Z" fill="#e899ac" opacity="0.5" transform="rotate(25 250 500)"/>
-    <path d="M 680 620 Q 695 635 685 650 Q 670 645 680 620 Z" fill="#e899ac" opacity="0.7" transform="rotate(-40 680 620)"/>
   </svg>
 
   <header>
-    <h1>Sakura &amp; Bloom</h1>
-    <p class="subtitle">Creative Projects &amp; Digital Works</p>
+    <h1>Calista's Website</h1>
     
     <div class="divider">
       <div class="divider-line"></div>
@@ -220,41 +235,34 @@
         </svg>
         <h2>Suika Game</h2>
         <p>A fun, physics-based puzzle game where you drop and merge matching fruits to create larger fruits and score points!</p>
-        <a href="./sukia/index.html" class="card-link">Play Game &rarr;</a>
+        <a href="suika/suika.html" class="card-link">Play Game &rarr;</a>
       </article>
 
-      <article class="card">
+      <!-- Blank Placeholder Project 1 -->
+      <article class="card placeholder">
         <svg class="card-icon" viewBox="0 0 24 24">
-          <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-11v6h2v-6h-2zm0-4v2h2V7h-2z"/>
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
         </svg>
-        <h2>Botanical Journal</h2>
-        <p>A web application for tracking plant growth, care schedules, and seasonal blooms with integrated floral illustrations.</p>
-        <a href="#" class="card-link">View Project &rarr;</a>
+        <h2>Upcoming Project</h2>
+        <p>New digital creation in progress. Check back soon for updates!</p>
+        <span class="card-status">Coming Soon</span>
       </article>
 
-      <article class="card">
+      <!-- Blank Placeholder Project 2 -->
+      <article class="card placeholder">
         <svg class="card-icon" viewBox="0 0 24 24">
-          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
         </svg>
-        <h2>Petal Audio Visualizer</h2>
-        <p>An interactive canvas experiment rendering organic cherry blossom petal animations synchronized to ambient music tracks.</p>
-        <a href="#" class="card-link">Listen &amp; View &rarr;</a>
-      </article>
-
-      <article class="card">
-        <svg class="card-icon" viewBox="0 0 24 24">
-          <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
-        </svg>
-        <h2>Hana Design Tokens</h2>
-        <p>A lightweight CSS design token system inspired by soft floral color palettes, elegant serif typography, and natural curves.</p>
-        <a href="#" class="card-link">Read Docs &rarr;</a>
+        <h2>Upcoming Project</h2>
+        <p>New digital creation in progress. Check back soon for updates!</p>
+        <span class="card-status">Coming Soon</span>
       </article>
 
     </div>
   </main>
 
   <footer>
-    <p>&copy; 2026 Designed with a Cherry Blossom Aesthetic.</p>
+    <p>&copy; Calista's Website</p>
   </footer>
 
 </body>
