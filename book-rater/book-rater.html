@@ -3,35 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Literary Nook - Book Rater</title>
-    <!-- Tailwind CSS -->
+    <title>Book Rater App</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- FontAwesome for star icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        palette: {
-                            dark: '#223030',       // Dark Slate Black
-                            espresso: '#523D35',   // Deep Espresso Brown
-                            sage: '#959D90',       // Muted Sage Green
-                            taupe: '#BBA58F',      // Warm Taupe / Sand
-                            cream: '#E8D9CD',      // Cream / Light Beige
-                            bg: '#EFEFE9'          // Off-white Background
-                        }
+                        darkSlate: '#223030',
+                        espresso: '#523D35',
+                        sage: '#959D90',
+                        sand: '#BBA58F',
+                        sandHover: '#a38d76',
+                        creamSoft: '#E8D9CD',
+                        creamLight: '#EFEFE9',
                     },
                     fontFamily: {
-                        serif: ['Cinzel', 'serif'],
-                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
                     }
                 }
             }
@@ -41,33 +33,10 @@
         body {
             background-color: #EFEFE9;
             color: #223030;
-            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .font-serif-title {
-            font-family: 'Cinzel', serif;
-        }
-        .star-rating {
-            display: inline-flex;
-            flex-direction: row-reverse;
-        }
-        .star-rating input {
-            display: none;
-        }
-        .star-rating label {
-            color: #BBA58F;
-            font-size: 1.5rem;
-            padding: 0 0.15rem;
-            cursor: pointer;
-            transition: color 0.15s ease-in-out;
-        }
-        .star-rating label:hover,
-        .star-rating label:hover ~ label,
-        .star-rating input:checked ~ label {
-            color: #523D35;
-        }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
             background: #EFEFE9;
@@ -79,616 +48,1005 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #959D90;
         }
+        .modal-backdrop {
+            background-color: rgba(34, 48, 48, 0.6);
+            backdrop-filter: blur(4px);
+        }
+        .star-rating i {
+            transition: color 0.15s ease-in-out, transform 0.15s ease-in-out;
+        }
+        .star-rating i:hover {
+            transform: scale(1.15);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen font-sans flex flex-col justify-between">
 
-    <!-- Header -->
-    <header class="bg-[#223030] text-[#E8D9CD] shadow-lg sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-[#523D35] rounded-xl border border-[#BBA58F]/30 shadow-md">
-                    <i data-lucide="book-open-check" class="w-7 h-7 text-[#E8D9CD]"></i>
+    <!-- Top Nav Header -->
+    <header class="bg-[#223030] text-[#EFEFE9] sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#BBA58F] text-[#223030] flex items-center justify-center font-bold text-xl shadow-inner">
+                    <i class="fa-solid fa-book-open"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold font-serif-title tracking-wide text-[#E8D9CD]">LITERARY NOOK</h1>
-                    <p class="text-xs text-[#959D90] font-medium tracking-wider uppercase">Personal Book Journal & Rating Companion</p>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[#EFEFE9]">Book Rater</h1>
+                    <p class="text-xs text-[#959D90]">Cloud-powered reading logs & reviews</p>
                 </div>
             </div>
-            <button onclick="scrollToForm()" class="bg-[#523D35] hover:bg-[#BBA58F] text-[#EFEFE9] hover:text-[#223030] px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform active:scale-95">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span>Add New Book</span>
-            </button>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- Status Badge Button -->
+                <button id="statusBadgeBtn" onclick="openConfigModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#523D35] hover:bg-[#959D90]/20 border border-[#959D90]/30 transition-all cursor-pointer">
+                    <span id="statusIndicator" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block animate-pulse"></span>
+                    <span id="statusText" class="text-[#EFEFE9]">Local Storage Mode</span>
+                </button>
+
+                <!-- SQL Helper Button -->
+                <button onclick="openSqlModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#E8D9CD] hover:text-white bg-[#523D35]/50 hover:bg-[#523D35] transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-code text-[#BBA58F]"></i> SQL Setup
+                </button>
+
+                <!-- New Book Button -->
+                <button onclick="openBookModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-[#223030] bg-[#BBA58F] hover:bg-[#a38d76] shadow transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Book
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
 
-        <!-- Stats Bar -->
-        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-[#E8D9CD] p-5 rounded-xl border border-[#BBA58F] shadow-sm flex items-center justify-between">
+        <!-- Supabase Status Banner (Shown when using localStorage fallback) -->
+        <div id="connectionBanner" class="hidden bg-[#523D35] border-l-4 border-[#BBA58F] text-[#EFEFE9] p-4 rounded-xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-fade-in">
+            <div class="flex items-start gap-3">
+                <i class="fa-solid fa-cloud-arrow-up text-[#BBA58F] text-2xl mt-0.5"></i>
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-[#523D35]">Total Books</p>
-                    <p id="stat-total" class="text-3xl font-bold text-[#223030] font-serif-title mt-1">0</p>
+                    <h3 class="font-semibold text-sm sm:text-base">Connect to Supabase Cloud</h3>
+                    <p class="text-xs text-[#E8D9CD] mt-0.5">Currently saving data locally to this browser. Connect your Supabase project to sync books across all your devices seamlessly.</p>
                 </div>
-                <div class="p-3 bg-[#959D90]/20 rounded-full text-[#223030]">
-                    <i data-lucide="library" class="w-6 h-6"></i>
+            </div>
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <button onclick="openConfigModal()" class="px-3 py-1.5 bg-[#BBA58F] hover:bg-[#a38d76] text-[#223030] text-xs font-bold rounded-lg transition-all whitespace-nowrap">
+                    Connect Now
+                </button>
+                <button onclick="dismissBanner()" class="px-2 py-1.5 text-[#959D90] hover:text-white text-xs rounded-lg transition-all" title="Dismiss">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Dashboard -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-[#E8D9CD] p-4 rounded-2xl shadow-sm border border-[#BBA58F]/30 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-[#523D35]">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Total Books</span>
+                    <i class="fa-solid fa-book text-base opacity-70"></i>
+                </div>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span id="statTotalBooks" class="text-2xl sm:text-3xl font-bold text-[#223030]">0</span>
+                    <span class="text-xs text-[#523D35]">logged</span>
                 </div>
             </div>
 
-            <div class="bg-[#E8D9CD] p-5 rounded-xl border border-[#BBA58F] shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-[#523D35]">Average Rating</p>
-                    <div class="flex items-baseline gap-2 mt-1">
-                        <p id="stat-avg" class="text-3xl font-bold text-[#223030] font-serif-title">0.0</p>
-                        <span class="text-xs text-[#523D35] font-medium">/ 5.0</span>
-                    </div>
+            <div class="bg-[#E8D9CD] p-4 rounded-2xl shadow-sm border border-[#BBA58F]/30 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-[#523D35]">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Avg Rating</span>
+                    <i class="fa-solid fa-star text-base text-amber-600 opacity-80"></i>
                 </div>
-                <div class="p-3 bg-[#959D90]/20 rounded-full text-[#523D35]">
-                    <i data-lucide="star" class="w-6 h-6 fill-current"></i>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span id="statAvgRating" class="text-2xl sm:text-3xl font-bold text-[#223030]">0.0</span>
+                    <span class="text-xs text-[#523D35]">/ 5.0</span>
                 </div>
             </div>
 
-            <div class="bg-[#E8D9CD] p-5 rounded-xl border border-[#BBA58F] shadow-sm flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-[#523D35]">Top Rated Genre</p>
-                    <p id="stat-genre" class="text-lg font-bold text-[#223030] font-serif-title mt-1 truncate max-w-[180px]">N/A</p>
+            <div class="bg-[#E8D9CD] p-4 rounded-2xl shadow-sm border border-[#BBA58F]/30 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-[#523D35]">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Top Genre</span>
+                    <i class="fa-solid fa-shapes text-base opacity-70"></i>
                 </div>
-                <div class="p-3 bg-[#959D90]/20 rounded-full text-[#223030]">
-                    <i data-lucide="bookmark" class="w-6 h-6"></i>
+                <div class="mt-2">
+                    <span id="statTopGenre" class="text-lg sm:text-xl font-bold text-[#223030] truncate block">None</span>
+                </div>
+            </div>
+
+            <div class="bg-[#E8D9CD] p-4 rounded-2xl shadow-sm border border-[#BBA58F]/30 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-[#523D35]">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Storage Mode</span>
+                    <i class="fa-solid fa-[#523D35] fa-database text-base opacity-70"></i>
+                </div>
+                <div class="mt-2">
+                    <span id="statStorageType" class="text-sm sm:text-base font-bold text-[#223030] block">LocalStorage</span>
                 </div>
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Controls Toolbar (Search, Filter, Sort, Actions) -->
+        <section class="bg-[#E8D9CD] p-4 rounded-2xl shadow-sm border border-[#BBA58F]/30 flex flex-col lg:flex-row items-center justify-between gap-4">
+            <!-- Search Bar -->
+            <div class="relative w-full lg:w-1/3">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[#523D35]/60 text-sm"></i>
+                <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search title, author, review..." 
+                    class="w-full pl-10 pr-4 py-2 bg-[#EFEFE9] border border-[#BBA58F]/50 rounded-xl text-sm focus:outline-none focus:border-[#523D35] text-[#223030] placeholder-[#523D35]/50">
+            </div>
 
-            <!-- Left Side: Add / Edit Form -->
-            <section id="form-container" class="lg:col-span-5 bg-[#E8D9CD] p-6 rounded-2xl border border-[#BBA58F] shadow-md self-start sticky top-24">
-                <div class="flex items-center justify-between mb-5 pb-3 border-b border-[#BBA58F]">
-                    <h2 id="form-title" class="text-xl font-bold font-serif-title text-[#223030] flex items-center gap-2">
-                        <i data-lucide="pen-tool" class="w-5 h-5 text-[#523D35]"></i>
-                        <span>Add New Review</span>
-                    </h2>
-                    <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-[#523D35] hover:text-[#223030] underline font-semibold">
-                        Cancel Edit
-                    </button>
-                </div>
+            <!-- Filters Group -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
+                <!-- Genre Filter -->
+                <select id="genreFilter" onchange="applyFilters()" class="bg-[#EFEFE9] border border-[#BBA58F]/50 rounded-xl px-3 py-2 text-xs sm:text-sm text-[#223030] focus:outline-none focus:border-[#523D35]">
+                    <option value="ALL">All Genres</option>
+                    <option value="Fiction">Fiction</option>
+                    <option value="Non-Fiction">Non-Fiction</option>
+                    <option value="Sci-Fi/Fantasy">Sci-Fi/Fantasy</option>
+                    <option value="Mystery/Thriller">Mystery/Thriller</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Biography">Biography</option>
+                    <option value="History">History</option>
+                    <option value="Self-Help">Self-Help</option>
+                    <option value="Poetry">Poetry</option>
+                    <option value="Graphic Novel">Graphic Novel</option>
+                    <option value="Other">Other</option>
+                </select>
 
-                <form id="book-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
-                    <input type="hidden" id="book-id">
+                <!-- Rating Filter -->
+                <select id="ratingFilter" onchange="applyFilters()" class="bg-[#EFEFE9] border border-[#BBA58F]/50 rounded-xl px-3 py-2 text-xs sm:text-sm text-[#223030] focus:outline-none focus:border-[#523D35]">
+                    <option value="ALL">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="2">2+ Stars</option>
+                    <option value="1">1+ Star</option>
+                </select>
 
-                    <!-- Title Input -->
-                    <div>
-                        <label for="title" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Book Title <span class="text-red-700">*</span></label>
-                        <input type="text" id="title" required placeholder="e.g. The Shadow of the Wind" class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all">
-                    </div>
+                <!-- Sort Option -->
+                <select id="sortBy" onchange="applyFilters()" class="bg-[#EFEFE9] border border-[#BBA58F]/50 rounded-xl px-3 py-2 text-xs sm:text-sm text-[#223030] focus:outline-none focus:border-[#523D35]">
+                    <option value="newest">Sort: Newest First</option>
+                    <option value="highest">Sort: Highest Rated</option>
+                    <option value="lowest">Sort: Lowest Rated</option>
+                    <option value="alpha">Sort: Title (A-Z)</option>
+                </select>
 
-                    <!-- Author Input -->
-                    <div>
-                        <label for="author" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Author <span class="text-red-700">*</span></label>
-                        <input type="text" id="author" required placeholder="e.g. Carlos Ruiz Zafón" class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all">
-                    </div>
+                <!-- Demo Data Seed Button -->
+                <button onclick="seedSampleData()" class="px-3 py-2 bg-[#959D90] hover:bg-[#828a7d] text-white text-xs rounded-xl transition-all flex items-center gap-1.5 font-medium ml-auto lg:ml-0" title="Load sample books">
+                    <i class="fa-solid fa-vial"></i> Sample Data
+                </button>
+            </div>
+        </section>
 
-                    <!-- Genre Dropdown -->
-                    <div>
-                        <label for="genre" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Genre <span class="text-red-700">*</span></label>
-                        <select id="genre" required class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all">
-                            <option value="" disabled selected>Select a genre...</option>
-                            <option value="Fiction">Fiction</option>
-                            <option value="Non-Fiction">Non-Fiction</option>
-                            <option value="Mystery">Mystery</option>
-                            <option value="Sci-Fi / Fantasy">Sci-Fi / Fantasy</option>
-                            <option value="Romance">Romance</option>
-                            <option value="Thriller">Thriller</option>
-                            <option value="Historical Fiction">Historical Fiction</option>
-                            <option value="Biography">Biography</option>
-                            <option value="Self-Help">Self-Help</option>
-                            <option value="Philosophy">Philosophy</option>
-                            <option value="Poetry">Poetry</option>
-                        </select>
-                    </div>
+        <!-- Book Cards Grid -->
+        <section id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Book Cards will be rendered dynamically here -->
+        </section>
 
-                    <!-- Star Rating Interactive Selector -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Rating <span class="text-red-700">*</span></label>
-                        <div class="flex items-center gap-3 bg-[#EFEFE9] p-3 rounded-lg border border-[#BBA58F]">
-                            <div class="star-rating text-2xl">
-                                <input type="radio" id="star5" name="rating" value="5" required />
-                                <label for="star5" title="5 stars"><i class="fa-solid fa-star"></i></label>
-                                
-                                <input type="radio" id="star4" name="rating" value="4" />
-                                <label for="star4" title="4 stars"><i class="fa-solid fa-star"></i></label>
-
-                                <input type="radio" id="star3" name="rating" value="3" />
-                                <label for="star3" title="3 stars"><i class="fa-solid fa-star"></i></label>
-
-                                <input type="radio" id="star2" name="rating" value="2" />
-                                <label for="star2" title="2 stars"><i class="fa-solid fa-star"></i></label>
-
-                                <input type="radio" id="star1" name="rating" value="1" />
-                                <label for="star1" title="1 star"><i class="fa-solid fa-star"></i></label>
-                            </div>
-                            <span id="rating-label" class="text-xs text-[#959D90] font-semibold">Select rating</span>
-                        </div>
-                    </div>
-
-                    <!-- Notes / Review Area -->
-                    <div>
-                        <label for="review" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Review & Notes</label>
-                        <textarea id="review" rows="4" placeholder="Write your thoughts, key takeaways, or favorite quotes..." class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all resize-none"></textarea>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" id="submit-btn" class="w-full py-3 px-4 bg-[#523D35] hover:bg-[#223030] text-[#EFEFE9] font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
-                        <i data-lucide="plus" class="w-5 h-5"></i>
-                        <span id="submit-btn-text">Add Book Review</span>
-                    </button>
-                </form>
-            </section>
-
-            <!-- Right Side: Book Shelf & Controls -->
-            <section class="lg:col-span-7 space-y-6">
-
-                <!-- Filter Controls Bar -->
-                <div class="bg-[#E8D9CD] p-4 rounded-xl border border-[#BBA58F] shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
-                    
-                    <!-- Search Input -->
-                    <div class="relative w-full md:w-1/3">
-                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#523D35]"></i>
-                        <input type="text" id="search-input" oninput="renderBooks()" placeholder="Search title or author..." class="w-full pl-9 pr-3 py-2 text-xs rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-1 focus:ring-[#523D35]">
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-                        <!-- Genre Filter -->
-                        <select id="filter-genre" onchange="renderBooks()" class="px-3 py-2 text-xs rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-1 focus:ring-[#523D35]">
-                            <option value="ALL">All Genres</option>
-                            <option value="Fiction">Fiction</option>
-                            <option value="Non-Fiction">Non-Fiction</option>
-                            <option value="Mystery">Mystery</option>
-                            <option value="Sci-Fi / Fantasy">Sci-Fi / Fantasy</option>
-                            <option value="Romance">Romance</option>
-                            <option value="Thriller">Thriller</option>
-                            <option value="Historical Fiction">Historical Fiction</option>
-                            <option value="Biography">Biography</option>
-                            <option value="Self-Help">Self-Help</option>
-                            <option value="Philosophy">Philosophy</option>
-                            <option value="Poetry">Poetry</option>
-                        </select>
-
-                        <!-- Rating Sort Dropdown -->
-                        <select id="sort-rating" onchange="renderBooks()" class="px-3 py-2 text-xs rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-1 focus:ring-[#523D35]">
-                            <option value="NEWEST">Newest First</option>
-                            <option value="HIGHEST">Highest Rated</option>
-                            <option value="LOWEST">Lowest Rated</option>
-                            <option value="TITLE">Title (A-Z)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Book Grid List -->
-                <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Dynamic Book Cards injected here -->
-                </div>
-
-                <!-- Empty State Message -->
-                <div id="empty-state" class="hidden bg-[#E8D9CD]/50 border-2 border-dashed border-[#BBA58F] rounded-2xl p-10 text-center space-y-3">
-                    <div class="w-12 h-12 mx-auto rounded-full bg-[#959D90]/20 flex items-center justify-center text-[#523D35]">
-                        <i data-lucide="book-open" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-lg font-bold font-serif-title text-[#223030]">No Books Found</h3>
-                    <p class="text-sm text-[#523D35] max-w-sm mx-auto">Try adjusting your filters or search terms, or add a new book to your library!</p>
-                </div>
-
-            </section>
+        <!-- Empty State View -->
+        <div id="emptyState" class="hidden bg-[#E8D9CD]/50 border-2 border-dashed border-[#BBA58F] rounded-2xl p-12 text-center space-y-4 my-8">
+            <div class="w-16 h-16 mx-auto rounded-full bg-[#BBA58F]/20 text-[#523D35] flex items-center justify-center text-2xl">
+                <i class="fa-solid fa-book-open-reader"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[#223030]">No books found</h3>
+            <p class="text-sm text-[#523D35] max-w-md mx-auto">Try clearing your search filters or start logging your reading journey by adding a new book rating.</p>
+            <div class="flex justify-center gap-3 pt-2">
+                <button onclick="openBookModal()" class="px-4 py-2 bg-[#BBA58F] hover:bg-[#a38d76] text-[#223030] text-xs font-bold rounded-xl shadow transition-all">
+                    Add First Book
+                </button>
+                <button onclick="seedSampleData()" class="px-4 py-2 bg-[#959D90] hover:bg-[#828a7d] text-white text-xs font-bold rounded-xl shadow transition-all">
+                    Load Demo Data
+                </button>
+            </div>
         </div>
+
     </main>
 
-    <!-- View Modal -->
-    <div id="view-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#E8D9CD] rounded-2xl border border-[#BBA58F] shadow-2xl max-w-lg w-full p-6 space-y-5 relative animate-fade-in">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-[#523D35] hover:text-[#223030] p-1">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-            <div id="modal-content">
-                <!-- Injected via JavaScript -->
+    <!-- Footer -->
+    <footer class="bg-[#223030] text-[#959D90] py-6 border-t border-[#523D35]">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs space-y-2">
+            <p>&copy; 2026 Book Rater • Built with HTML, Tailwind CSS & Supabase Client API</p>
+            <p class="text-[#BBA58F]">Supports LocalStorage offline mode with seamless Supabase cloud synchronization</p>
+        </div>
+    </footer>
+
+    <!-- 1. ADD / EDIT BOOK MODAL -->
+    <div id="bookModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden animate-fade-in">
+        <div class="bg-[#EFEFE9] rounded-2xl shadow-xl border border-[#BBA58F] w-full max-w-md overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-[#223030] text-[#EFEFE9] px-6 py-4 flex items-center justify-between">
+                <h3 id="bookModalTitle" class="font-bold text-lg">Add New Book</h3>
+                <button onclick="closeBookModal()" class="text-[#959D90] hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="bookForm" onsubmit="handleSaveBook(event)" class="p-6 space-y-4">
+                <input type="hidden" id="bookId">
+
+                <!-- Title Input -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Book Title *</label>
+                    <input type="text" id="bookTitle" required placeholder="e.g. The Great Gatsby"
+                        class="w-full px-3.5 py-2 bg-[#E8D9CD] border border-[#BBA58F] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#523D35] text-[#223030]">
+                </div>
+
+                <!-- Author Input -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Author</label>
+                    <input type="text" id="bookAuthor" placeholder="e.g. F. Scott Fitzgerald"
+                        class="w-full px-3.5 py-2 bg-[#E8D9CD] border border-[#BBA58F] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#523D35] text-[#223030]">
+                </div>
+
+                <!-- Genre & Rating Row -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Genre -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Genre</label>
+                        <select id="bookGenre" class="w-full px-3 py-2 bg-[#E8D9CD] border border-[#BBA58F] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#523D35] text-[#223030]">
+                            <option value="Fiction">Fiction</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Sci-Fi/Fantasy">Sci-Fi/Fantasy</option>
+                            <option value="Mystery/Thriller">Mystery/Thriller</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Biography">Biography</option>
+                            <option value="History">History</option>
+                            <option value="Self-Help">Self-Help</option>
+                            <option value="Poetry">Poetry</option>
+                            <option value="Graphic Novel">Graphic Novel</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Rating Star Picker -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Rating *</label>
+                        <div class="flex items-center gap-1 text-amber-600 pt-1 star-rating" id="starPicker">
+                            <i class="fa-regular fa-star text-lg cursor-pointer" onclick="setFormRating(1)"></i>
+                            <i class="fa-regular fa-star text-lg cursor-pointer" onclick="setFormRating(2)"></i>
+                            <i class="fa-regular fa-star text-lg cursor-pointer" onclick="setFormRating(3)"></i>
+                            <i class="fa-regular fa-star text-lg cursor-pointer" onclick="setFormRating(4)"></i>
+                            <i class="fa-regular fa-star text-lg cursor-pointer" onclick="setFormRating(5)"></i>
+                        </div>
+                        <input type="hidden" id="bookRating" value="5" required>
+                    </div>
+                </div>
+
+                <!-- Review Text -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Review / Notes</label>
+                    <textarea id="bookReview" rows="3" placeholder="Write your thoughts or favorite quotes..."
+                        class="w-full px-3.5 py-2 bg-[#E8D9CD] border border-[#BBA58F] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#523D35] text-[#223030]"></textarea>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-[#BBA58F]/40">
+                    <button type="button" onclick="closeBookModal()" class="px-4 py-2 text-xs font-semibold text-[#523D35] hover:bg-[#E8D9CD] rounded-xl transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-[#BBA58F] hover:bg-[#a38d76] text-[#223030] font-bold text-xs rounded-xl shadow transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- 2. SUPABASE CONFIGURATION MODAL -->
+    <div id="configModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden animate-fade-in">
+        <div class="bg-[#EFEFE9] rounded-2xl shadow-xl border border-[#BBA58F] w-full max-w-lg overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-[#223030] text-[#EFEFE9] px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-plug text-[#BBA58F]"></i>
+                    <h3 class="font-bold text-lg">Supabase Cloud Connection</h3>
+                </div>
+                <button onclick="closeConfigModal()" class="text-[#959D90] hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <!-- Instructions Banner -->
+                <div class="bg-[#E8D9CD] p-3.5 rounded-xl border border-[#BBA58F] text-xs text-[#523D35] space-y-1.5">
+                    <p class="font-bold text-[#223030]">How to find your credentials:</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Log in to your <a href="https://supabase.com/dashboard" target="_blank" class="underline font-semibold text-[#223030]">Supabase Dashboard</a>.</li>
+                        <li>Select your project & go to <strong>Project Settings</strong> &rarr; <strong>API</strong>.</li>
+                        <li>Copy the <strong>Project URL</strong> and <strong>anon (public) Key</strong> into the fields below.</li>
+                    </ol>
+                </div>
+
+                <form id="configForm" onsubmit="handleSaveConfig(event)" class="space-y-4">
+                    <!-- Project URL -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Supabase Project URL *</label>
+                        <input type="url" id="supabaseUrlInput" placeholder="https://your-project.supabase.co" required
+                            class="w-full px-3.5 py-2 bg-[#E8D9CD] border border-[#BBA58F] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#523D35] text-[#223030]">
+                    </div>
+
+                    <!-- Anon Key -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Supabase Anon Key *</label>
+                        <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." required
+                            class="w-full px-3.5 py-2 bg-[#E8D9CD] border border-[#BBA58F] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#523D35] text-[#223030]">
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2">
+                        <button type="button" onclick="disconnectSupabase()" id="disconnectBtn" class="px-4 py-2 text-xs font-semibold text-rose-700 bg-rose-100 hover:bg-rose-200 rounded-xl transition-all hidden">
+                            Disconnect & Use Local Storage
+                        </button>
+                        <div class="flex-grow"></div>
+                        <button type="button" onclick="closeConfigModal()" class="px-4 py-2 text-xs font-semibold text-[#523D35] hover:bg-[#E8D9CD] rounded-xl transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2 bg-[#BBA58F] hover:bg-[#a38d76] text-[#223030] font-bold text-xs rounded-xl shadow transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-link"></i> Connect
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- 3. SQL SETUP HELPER MODAL -->
+    <div id="sqlModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden animate-fade-in">
+        <div class="bg-[#EFEFE9] rounded-2xl shadow-xl border border-[#BBA58F] w-full max-w-2xl overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-[#223030] text-[#EFEFE9] px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-terminal text-[#BBA58F]"></i>
+                    <h3 class="font-bold text-lg">Supabase Table Setup (SQL)</h3>
+                </div>
+                <button onclick="closeSqlModal()" class="text-[#959D90] hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-[#523D35]">
+                    Run this SQL script in your Supabase project's <strong>SQL Editor</strong> tab to create the required <code class="bg-[#E8D9CD] px-1.5 py-0.5 rounded text-[#223030] font-bold">books</code> table and enable public access policies.
+                </p>
+
+                <!-- Code View -->
+                <div class="relative">
+                    <pre class="bg-[#223030] text-[#EFEFE9] text-xs p-4 rounded-xl overflow-x-auto font-mono leading-relaxed border border-[#523D35]">
+<span class="text-[#959D90]">-- 1. Create the books table</span>
+<span class="text-[#BBA58F]">CREATE TABLE</span> IF NOT EXISTS books (
+  id UUID <span class="text-[#BBA58F]">DEFAULT</span> gen_random_uuid() <span class="text-[#BBA58F]">PRIMARY KEY</span>,
+  title TEXT <span class="text-[#BBA58F]">NOT NULL</span>,
+  author TEXT,
+  rating INT <span class="text-[#BBA58F]">DEFAULT</span> 5,
+  genre TEXT,
+  review TEXT,
+  created_at TIMESTAMPTZ <span class="text-[#BBA58F]">DEFAULT</span> <span class="text-[#BBA58F]">NOW</span>()
+);
+
+<span class="text-[#959D90]">-- 2. Enable Row Level Security (RLS)</span>
+<span class="text-[#BBA58F]">ALTER TABLE</span> books <span class="text-[#BBA58F]">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="text-[#959D90]">-- 3. Create public access policy for easy demo CRUD operations</span>
+<span class="text-[#BBA58F]">CREATE POLICY</span> <span class="text-emerald-400">"Allow public access"</span> 
+<span class="text-[#BBA58F]">ON</span> books <span class="text-[#BBA58F]">FOR ALL</span> 
+<span class="text-[#BBA58F]">USING</span> (true) 
+<span class="text-[#BBA58F]">WITH CHECK</span> (true);</pre>
+                    
+                    <button onclick="copySqlToClipboard()" class="absolute top-3 right-3 px-3 py-1.5 bg-[#BBA58F] hover:bg-[#a38d76] text-[#223030] font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow">
+                        <i class="fa-regular fa-copy"></i> Copy SQL
+                    </button>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button onclick="closeSqlModal()" class="px-5 py-2 bg-[#523D35] hover:bg-[#223030] text-white text-xs font-bold rounded-xl transition-all">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
 
     <script>
-        // Sample Pre-populated data
-        const initialBooks = [
+        // Default Sample Books Data
+        const SAMPLE_BOOKS = [
             {
-                id: '1',
-                title: 'Dune',
-                author: 'Frank Herbert',
-                genre: 'Sci-Fi / Fantasy',
+                title: "To Kill a Mockingbird",
+                author: "Harper Lee",
                 rating: 5,
-                review: 'A magnificent masterpiece of world-building and political intrigue. The depth of culture and desert ecology is unparalleled.',
-                createdAt: new Date('2026-01-10').toISOString()
+                genre: "Fiction",
+                review: "A timeless masterpiece exploring empathy, justice, and human nature through Scout's eyes.",
+                created_at: new Date(Date.now() - 86400000 * 4).toISOString()
             },
             {
-                id: '2',
-                title: 'The Silent Patient',
-                author: 'Alex Michaelides',
-                genre: 'Thriller',
+                title: "Dune",
+                author: "Frank Herbert",
+                rating: 5,
+                genre: "Sci-Fi/Fantasy",
+                review: "Epic world-building with complex political and environmental themes. Unforgettable atmosphere.",
+                created_at: new Date(Date.now() - 86400000 * 3).toISOString()
+            },
+            {
+                title: "Atomic Habits",
+                author: "James Clear",
                 rating: 4,
-                review: 'A brilliant psychological thriller with a plot twist that completely caught me off guard. Highly recommended!',
-                createdAt: new Date('2026-02-14').toISOString()
+                genre: "Self-Help",
+                review: "Practical framework for continuous micro-improvements. Highly actionable advice.",
+                created_at: new Date(Date.now() - 86400000 * 2).toISOString()
             },
             {
-                id: '3',
-                title: 'Atomic Habits',
-                author: 'James Clear',
-                genre: 'Self-Help',
-                rating: 5,
-                review: 'Practical and actionable frameworks for building good habits and breaking bad ones. Small 1% gains compound fast.',
-                createdAt: new Date('2026-03-01').toISOString()
+                title: "The Silent Patient",
+                author: "Alex Michaelides",
+                rating: 4,
+                genre: "Mystery/Thriller",
+                review: "Gripping psychological thriller with a wild plot twist near the end that I did not see coming!",
+                created_at: new Date(Date.now() - 86400000 * 1).toISOString()
             }
         ];
 
-        let books = [];
+        // Application State Variables
+        let supabaseClient = null;
+        let booksData = [];
+        let isSupabaseActive = false;
+        let currentFormRating = 5;
 
-        // Initialize App
+        // Initialize App on DOM Load
         window.addEventListener('DOMContentLoaded', () => {
-            loadBooks();
-            setupRatingListeners();
-            renderBooks();
-            lucide.createIcons();
+            initSupabaseClient();
+            loadBooksData();
+            setFormRating(5);
         });
 
-        // Load Books from LocalStorage
-        function loadBooks() {
-            const stored = localStorage.getItem('literary_nook_books');
-            if (stored) {
+        // Initialize Supabase Client if credentials exist
+        function initSupabaseClient() {
+            const storedUrl = localStorage.getItem('supabase_bookrater_url');
+            const storedKey = localStorage.getItem('supabase_bookrater_key');
+
+            if (storedUrl && storedKey && window.supabase) {
                 try {
-                    books = JSON.parse(stored);
-                } catch (e) {
-                    books = [...initialBooks];
+                    supabaseClient = window.supabase.createClient(storedUrl, storedKey);
+                    isSupabaseActive = true;
+                    updateConnectionUI(true, storedUrl);
+                } catch (err) {
+                    console.error("Failed to initialize Supabase:", err);
+                    isSupabaseActive = false;
+                    updateConnectionUI(false);
                 }
             } else {
-                books = [...initialBooks];
-                saveBooks();
+                isSupabaseActive = false;
+                updateConnectionUI(false);
             }
         }
 
-        // Save Books to LocalStorage
-        function saveBooks() {
-            localStorage.setItem('literary_nook_books', JSON.stringify(books));
+        // Update Nav Badge & UI Indicators
+        function updateConnectionUI(connected, url = '') {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const storageType = document.getElementById('statStorageType');
+            const banner = document.getElementById('connectionBanner');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+
+            if (connected) {
+                indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block';
+                statusText.innerText = 'Supabase Cloud';
+                storageType.innerText = 'Supabase Cloud';
+                storageType.className = 'text-sm sm:text-base font-bold text-emerald-800 block';
+                banner.classList.add('hidden');
+                disconnectBtn.classList.remove('hidden');
+
+                if (url) {
+                    document.getElementById('supabaseUrlInput').value = url;
+                }
+            } else {
+                indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 inline-block animate-pulse';
+                statusText.innerText = 'LocalStorage Mode';
+                storageType.innerText = 'LocalStorage';
+                storageType.className = 'text-sm sm:text-base font-bold text-[#523D35] block';
+                banner.classList.remove('hidden');
+                disconnectBtn.classList.add('hidden');
+            }
+        }
+
+        // Fetch Books from Supabase or LocalStorage
+        async function loadBooksData() {
+            if (isSupabaseActive && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('books')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (error) throw error;
+
+                    booksData = data || [];
+                    renderBooks();
+                    updateStats();
+                } catch (err) {
+                    console.error("Error fetching from Supabase:", err);
+                    showToast("Error loading from Supabase. Falling back to local data.", "error");
+                    loadFromLocalStorage();
+                }
+            } else {
+                loadFromLocalStorage();
+            }
+        }
+
+        function loadFromLocalStorage() {
+            const local = localStorage.getItem('local_books_data');
+            if (local) {
+                try {
+                    booksData = JSON.parse(local);
+                } catch (e) {
+                    booksData = [];
+                }
+            } else {
+                // Pre-populate with default sample books on first launch
+                booksData = SAMPLE_BOOKS.map((b, i) => ({ ...b, id: 'local_' + (Date.now() + i) }));
+                saveToLocalStorage();
+            }
+            renderBooks();
             updateStats();
         }
 
-        // Setup Hover and Select Listeners for Star Input
-        function setupRatingListeners() {
-            const radios = document.querySelectorAll('input[name="rating"]');
-            const ratingLabel = document.getElementById('rating-label');
-            const labels = {
-                '1': '1 Star - Poor',
-                '2': '2 Stars - Fair',
-                '3': '3 Stars - Good',
-                '4': '4 Stars - Very Good',
-                '5': '5 Stars - Excellent'
-            };
-
-            radios.forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    ratingLabel.textContent = labels[e.target.value] || 'Select rating';
-                    ratingLabel.classList.add('text-[#223030]');
-                    ratingLabel.classList.remove('text-[#959D90]');
-                });
-            });
+        function saveToLocalStorage() {
+            localStorage.setItem('local_books_data', JSON.stringify(booksData));
         }
 
-        // Handle Add/Edit Form Submission
-        function handleFormSubmit(e) {
-            e.preventDefault();
-
-            const id = document.getElementById('book-id').value;
-            const title = document.getElementById('title').value.trim();
-            const author = document.getElementById('author').value.trim();
-            const genre = document.getElementById('genre').value;
-            const review = document.getElementById('review').value.trim();
-
-            const ratingRadio = document.querySelector('input[name="rating"]:checked');
-            if (!ratingRadio) {
-                showToast('Please select a star rating!', 'error');
-                return;
-            }
-            const rating = parseInt(ratingRadio.value);
-
-            if (id) {
-                // Update Existing
-                const index = books.findIndex(b => b.id === id);
-                if (index !== -1) {
-                    books[index] = { ...books[index], title, author, genre, rating, review };
-                    showToast('Book updated successfully!', 'success');
-                }
-            } else {
-                // Create New
-                const newBook = {
-                    id: Date.now().toString(),
-                    title,
-                    author,
-                    genre,
-                    rating,
-                    review,
-                    createdAt: new Date().toISOString()
-                };
-                books.unshift(newBook);
-                showToast('Book added to library!', 'success');
-            }
-
-            saveBooks();
-            resetForm();
-            renderBooks();
-        }
-
-        // Edit Book Item
-        function editBook(id) {
-            const book = books.find(b => b.id === id);
-            if (!book) return;
-
-            document.getElementById('book-id').value = book.id;
-            document.getElementById('title').value = book.title;
-            document.getElementById('author').value = book.author;
-            document.getElementById('genre').value = book.genre;
-            document.getElementById('review').value = book.review;
-
-            const radio = document.querySelector(`input[name="rating"][value="${book.rating}"]`);
-            if (radio) {
-                radio.checked = true;
-                radio.dispatchEvent(new Event('change'));
-            }
-
-            document.getElementById('form-title').innerHTML = `
-                <i data-lucide="edit-3" class="w-5 h-5 text-[#523D35]"></i>
-                <span>Edit Review</span>
-            `;
-            document.getElementById('submit-btn-text').textContent = 'Update Review';
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-
-            lucide.createIcons();
-            scrollToForm();
-        }
-
-        // Delete Book Item
-        function deleteBook(id) {
-            if (confirm('Are you sure you want to remove this book review?')) {
-                books = books.filter(b => b.id !== id);
-                saveBooks();
-                renderBooks();
-                showToast('Book deleted.', 'info');
-            }
-        }
-
-        // Reset Form to Add Mode
-        function resetForm() {
-            document.getElementById('book-form').reset();
-            document.getElementById('book-id').value = '';
-            document.getElementById('form-title').innerHTML = `
-                <i data-lucide="pen-tool" class="w-5 h-5 text-[#523D35]"></i>
-                <span>Add New Review</span>
-            `;
-            document.getElementById('submit-btn-text').textContent = 'Add Book Review';
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-            
-            const ratingLabel = document.getElementById('rating-label');
-            ratingLabel.textContent = 'Select rating';
-            ratingLabel.classList.remove('text-[#223030]');
-            ratingLabel.classList.add('text-[#959D90]');
-
-            lucide.createIcons();
-        }
-
-        // Scroll to form helper
-        function scrollToForm() {
-            document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Render Stars Helper
-        function generateStarHTML(rating) {
-            let html = '<div class="flex text-[#523D35] gap-0.5 text-sm">';
-            for (let i = 1; i <= 5; i++) {
-                if (i <= rating) {
-                    html += '<i class="fa-solid fa-star"></i>';
-                } else {
-                    html += '<i class="fa-regular fa-star text-[#BBA58F]"></i>';
-                }
-            }
-            html += '</div>';
-            return html;
-        }
-
-        // Render Books Shelf & Apply Filters
+        // Render Books Grid according to search and filter criteria
         function renderBooks() {
-            const grid = document.getElementById('books-grid');
-            const emptyState = document.getElementById('empty-state');
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const genreFilter = document.getElementById('filter-genre').value;
-            const sortOption = document.getElementById('sort-rating').value;
+            const grid = document.getElementById('booksGrid');
+            const emptyState = document.getElementById('emptyState');
+            grid.innerHTML = '';
 
-            // Filter
-            let filtered = books.filter(book => {
-                const matchesSearch = book.title.toLowerCase().includes(search) || book.author.toLowerCase().includes(search);
-                const matchesGenre = genreFilter === 'ALL' || book.genre === genreFilter;
-                return matchesSearch && matchesGenre;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedGenre = document.getElementById('genreFilter').value;
+            const selectedRating = document.getElementById('ratingFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            // Filter logic
+            let filtered = booksData.filter(book => {
+                const matchesSearch = (
+                    (book.title && book.title.toLowerCase().includes(searchTerm)) ||
+                    (book.author && book.author.toLowerCase().includes(searchTerm)) ||
+                    (book.review && book.review.toLowerCase().includes(searchTerm))
+                );
+
+                const matchesGenre = (selectedGenre === 'ALL') || (book.genre === selectedGenre);
+                const matchesRating = (selectedRating === 'ALL') || (book.rating >= parseInt(selectedRating, 10));
+
+                return matchesSearch && matchesGenre && matchesRating;
             });
 
-            // Sort
+            // Sorting logic
             filtered.sort((a, b) => {
-                if (sortOption === 'HIGHEST') return b.rating - a.rating;
-                if (sortOption === 'LOWEST') return a.rating - b.rating;
-                if (sortOption === 'TITLE') return a.title.localeCompare(b.title);
-                return new Date(b.createdAt) - new Date(a.createdAt); // NEWEST
+                if (sortBy === 'newest') {
+                    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+                } else if (sortBy === 'highest') {
+                    return b.rating - a.rating;
+                } else if (sortBy === 'lowest') {
+                    return a.rating - b.rating;
+                } else if (sortBy === 'alpha') {
+                    return (a.title || '').localeCompare(b.title || '');
+                }
+                return 0;
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
+            } else {
+                emptyState.classList.add('hidden');
             }
 
-            emptyState.classList.add('hidden');
-            grid.innerHTML = filtered.map(book => `
-                <div class="bg-[#E8D9CD] rounded-xl border border-[#BBA58F] p-4 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+            // Render each card
+            filtered.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'bg-[#E8D9CD] rounded-2xl p-5 shadow-sm border border-[#BBA58F]/40 flex flex-col justify-between hover:shadow-md transition-all duration-200 animate-fade-in group';
+
+                // Stars display generator
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= book.rating) {
+                        starsHtml += `<i class="fa-solid fa-star text-amber-600 text-sm"></i>`;
+                    } else {
+                        starsHtml += `<i class="fa-regular fa-star text-[#959D90]/50 text-sm"></i>`;
+                    }
+                }
+
+                const formattedDate = book.created_at ? new Date(book.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
+                card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start gap-2 mb-2">
-                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#959D90]/30 text-[#223030]">
-                                ${book.genre}
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-[#523D35] text-[#EFEFE9]">
+                                ${escapeHtml(book.genre || 'Other')}
                             </span>
-                            ${generateStarHTML(book.rating)}
+                            <div class="flex items-center gap-1 opacity-90">
+                                ${starsHtml}
+                            </div>
                         </div>
-                        <h3 class="font-serif-title font-bold text-lg text-[#223030] leading-snug line-clamp-1 group-hover:text-[#523D35] transition-colors">
-                            ${escapeHtml(book.title)}
-                        </h3>
-                        <p class="text-xs text-[#523D35] font-semibold mb-3">
-                            by ${escapeHtml(book.author)}
-                        </p>
-                        ${book.review ? `
-                            <p class="text-xs text-[#223030]/80 line-clamp-3 bg-[#EFEFE9] p-2.5 rounded-lg border border-[#BBA58F]/40 italic mb-3">
-                                "${escapeHtml(book.review)}"
-                            </p>
-                        ` : ''}
+
+                        <h3 class="text-base font-bold text-[#223030] leading-snug line-clamp-2">${escapeHtml(book.title)}</h3>
+                        <p class="text-xs text-[#523D35] font-medium mt-0.5">by ${escapeHtml(book.author || 'Unknown Author')}</p>
+
+                        ${book.review ? `<p class="mt-3 text-xs text-[#223030]/80 italic bg-[#EFEFE9]/60 p-3 rounded-xl border border-[#BBA58F]/20 line-clamp-4">"${escapeHtml(book.review)}"</p>` : ''}
                     </div>
 
-                    <div class="flex items-center justify-between border-t border-[#BBA58F]/40 pt-3 mt-2 text-xs">
-                        <button onclick="openModal('${book.id}')" class="text-[#523D35] hover:text-[#223030] font-semibold flex items-center gap-1 hover:underline">
-                            <i data-lucide="eye" class="w-3.5 h-3.5"></i> Read More
-                        </button>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="editBook('${book.id}')" class="p-1.5 rounded-md hover:bg-[#959D90]/20 text-[#523D35] hover:text-[#223030] transition-colors" title="Edit">
-                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                    <div class="mt-4 pt-3 border-t border-[#BBA58F]/30 flex items-center justify-between text-xs text-[#959D90]">
+                        <span>${formattedDate}</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openBookModal('${book.id}')" class="p-1.5 text-[#523D35] hover:text-[#223030] hover:bg-[#BBA58F]/30 rounded-lg transition-all" title="Edit Book">
+                                <i class="fa-regular fa-pen-to-square text-sm"></i>
                             </button>
-                            <button onclick="deleteBook('${book.id}')" class="p-1.5 rounded-md hover:bg-red-100 text-red-700 transition-colors" title="Delete">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <button onclick="confirmDeleteBook('${book.id}')" class="p-1.5 text-rose-700 hover:text-rose-900 hover:bg-rose-100 rounded-lg transition-all" title="Delete Book">
+                                <i class="fa-regular fa-trash-can text-sm"></i>
                             </button>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
 
-            lucide.createIcons();
-            updateStats();
+                grid.appendChild(card);
+            });
         }
 
-        // Update Dashboard Statistics
-        function updateStats() {
-            document.getElementById('stat-total').textContent = books.length;
+        // Apply filters callback
+        function applyFilters() {
+            renderBooks();
+        }
 
-            if (books.length === 0) {
-                document.getElementById('stat-avg').textContent = '0.0';
-                document.getElementById('stat-genre').textContent = 'N/A';
+        // Calculate and update stats section
+        function updateStats() {
+            document.getElementById('statTotalBooks').innerText = booksData.length;
+
+            if (booksData.length === 0) {
+                document.getElementById('statAvgRating').innerText = '0.0';
+                document.getElementById('statTopGenre').innerText = 'None';
                 return;
             }
 
-            // Average rating
-            const totalRating = books.reduce((acc, b) => acc + b.rating, 0);
-            const avg = (totalRating / books.length).toFixed(1);
-            document.getElementById('stat-avg').textContent = avg;
+            // Average rating calculation
+            const sumRating = booksData.reduce((acc, b) => acc + (parseInt(b.rating, 10) || 0), 0);
+            const avg = (sumRating / booksData.length).toFixed(1);
+            document.getElementById('statAvgRating').innerText = avg;
 
-            // Top Genre calculation
+            // Top genre calculation
             const genreCounts = {};
-            books.forEach(b => {
-                genreCounts[b.genre] = (genreCounts[b.genre] || 0) + 1;
+            booksData.forEach(b => {
+                const g = b.genre || 'Other';
+                genreCounts[g] = (genreCounts[g] || 0) + 1;
             });
-            let topGenre = 'N/A';
+
+            let topGenre = 'None';
             let maxCount = 0;
-            for (const [genre, count] of Object.entries(genreCounts)) {
+            for (const [g, count] of Object.entries(genreCounts)) {
                 if (count > maxCount) {
                     maxCount = count;
-                    topGenre = genre;
+                    topGenre = g;
                 }
             }
-            document.getElementById('stat-genre').textContent = topGenre;
+            document.getElementById('statTopGenre').innerText = topGenre;
         }
 
-        // Open Detail Modal
-        function openModal(id) {
-            const book = books.find(b => b.id === id);
-            if (!book) return;
-
-            const modalContent = document.getElementById('modal-content');
-            modalContent.innerHTML = `
-                <div class="space-y-4">
-                    <div class="flex justify-between items-start gap-3">
-                        <div>
-                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#959D90]/30 text-[#223030] mb-2">
-                                ${book.genre}
-                            </span>
-                            <h2 class="text-2xl font-bold font-serif-title text-[#223030]">${escapeHtml(book.title)}</h2>
-                            <p class="text-sm font-semibold text-[#523D35]">by ${escapeHtml(book.author)}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-2 bg-[#EFEFE9] p-3 rounded-lg border border-[#BBA58F]">
-                        ${generateStarHTML(book.rating)}
-                        <span class="text-sm font-bold text-[#223030] ml-2">${book.rating} out of 5 Stars</span>
-                    </div>
-
-                    <div>
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Review & Notes</h4>
-                        <div class="bg-[#EFEFE9] p-4 rounded-xl border border-[#BBA58F] text-sm text-[#223030] whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
-                            ${book.review ? escapeHtml(book.review) : '<span class="italic text-[#959D90]">No detailed notes provided for this review.</span>'}
-                        </div>
-                    </div>
-
-                    <div class="text-xs text-[#959D90] text-right font-medium">
-                        Added on ${new Date(book.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('view-modal').classList.remove('hidden');
-            lucide.createIcons();
+        // Rating Picker interactive logic in form
+        function setFormRating(rating) {
+            currentFormRating = rating;
+            document.getElementById('bookRating').value = rating;
+            const stars = document.getElementById('starPicker').children;
+            for (let i = 0; i < 5; i++) {
+                if (i < rating) {
+                    stars[i].className = 'fa-solid fa-star text-lg cursor-pointer text-amber-600';
+                } else {
+                    stars[i].className = 'fa-regular fa-star text-lg cursor-pointer text-[#959D90]';
+                }
+            }
         }
 
-        // Close Modal
-        function closeModal() {
-            document.getElementById('view-modal').classList.add('hidden');
+        // Handle Save (Create or Update) Book
+        async function handleSaveBook(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('bookId').value;
+            const title = document.getElementById('bookTitle').value.trim();
+            const author = document.getElementById('bookAuthor').value.trim();
+            const genre = document.getElementById('bookGenre').value;
+            const rating = parseInt(document.getElementById('bookRating').value, 10);
+            const review = document.getElementById('bookReview').value.trim();
+
+            if (!title) {
+                showToast("Please enter a book title", "error");
+                return;
+            }
+
+            const payload = {
+                title,
+                author,
+                genre,
+                rating,
+                review,
+                created_at: id ? undefined : new Date().toISOString()
+            };
+
+            if (isSupabaseActive && supabaseClient) {
+                try {
+                    if (id) {
+                        // Update
+                        delete payload.created_at;
+                        const { error } = await supabaseClient
+                            .from('books')
+                            .update(payload)
+                            .eq('id', id);
+
+                        if (error) throw error;
+                        showToast("Book updated in Supabase cloud!");
+                    } else {
+                        // Create
+                        const { error } = await supabaseClient
+                            .from('books')
+                            .insert([payload]);
+
+                        if (error) throw error;
+                        showToast("New book saved to Supabase!");
+                    }
+                    closeBookModal();
+                    await loadBooksData();
+                } catch (err) {
+                    console.error("Supabase Save Error:", err);
+                    showToast("Failed to save to Supabase. Check console/RLS policies.", "error");
+                }
+            } else {
+                // LocalStorage Mode
+                if (id) {
+                    const idx = booksData.findIndex(b => b.id === id);
+                    if (idx !== -1) {
+                        booksData[idx] = { ...booksData[idx], ...payload };
+                        showToast("Book updated locally!");
+                    }
+                } else {
+                    const newBook = {
+                        id: 'local_' + Date.now(),
+                        ...payload,
+                        created_at: new Date().toISOString()
+                    };
+                    booksData.unshift(newBook);
+                    showToast("New book added locally!");
+                }
+                saveToLocalStorage();
+                closeBookModal();
+                renderBooks();
+                updateStats();
+            }
         }
 
-        // Toast Notifications
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
+        // Delete Book logic
+        async function confirmDeleteBook(id) {
+            if (!confirm("Are you sure you want to delete this book rating?")) return;
+
+            if (isSupabaseActive && supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('books')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+                    showToast("Book deleted from Supabase Cloud");
+                    await loadBooksData();
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    showToast("Failed to delete from Supabase", "error");
+                }
+            } else {
+                booksData = booksData.filter(b => b.id !== id);
+                saveToLocalStorage();
+                showToast("Book deleted locally");
+                renderBooks();
+                updateStats();
+            }
+        }
+
+        // Seed Sample Books Data
+        async function seedSampleData() {
+            if (isSupabaseActive && supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('books')
+                        .insert(SAMPLE_BOOKS);
+
+                    if (error) throw error;
+                    showToast("Sample books uploaded to Supabase!");
+                    await loadBooksData();
+                } catch (err) {
+                    console.error("Seed error:", err);
+                    showToast("Failed to insert samples to Supabase. Run SQL setup first.", "error");
+                }
+            } else {
+                const newSamples = SAMPLE_BOOKS.map((b, i) => ({ ...b, id: 'local_' + (Date.now() + i) }));
+                booksData = [...newSamples, ...booksData];
+                saveToLocalStorage();
+                showToast("Sample books added to local storage");
+                renderBooks();
+                updateStats();
+            }
+        }
+
+        // Save Supabase Configuration Credentials
+        async function handleSaveConfig(e) {
+            e.preventDefault();
+            const url = document.getElementById('supabaseUrlInput').value.trim();
+            const key = document.getElementById('supabaseKeyInput').value.trim();
+
+            if (!url || !key) {
+                showToast("Please provide both URL and Anon Key", "error");
+                return;
+            }
+
+            try {
+                const testClient = window.supabase.createClient(url, key);
+                // Simple health ping test
+                const { error } = await testClient.from('books').select('id').limit(1);
+
+                if (error && error.code === '42P01') {
+                    showToast("Connected to Supabase, but 'books' table doesn't exist yet! Open SQL Setup.", "warning");
+                }
+
+                localStorage.setItem('supabase_bookrater_url', url);
+                localStorage.setItem('supabase_bookrater_key', key);
+                supabaseClient = testClient;
+                isSupabaseActive = true;
+
+                updateConnectionUI(true, url);
+                closeConfigModal();
+                showToast("Successfully connected to Supabase!");
+                await loadBooksData();
+            } catch (err) {
+                console.error("Supabase connection error:", err);
+                showToast("Could not establish connection to Supabase", "error");
+            }
+        }
+
+        // Disconnect Supabase Credentials
+        function disconnectSupabase() {
+            localStorage.removeItem('supabase_bookrater_url');
+            localStorage.removeItem('supabase_bookrater_key');
+            supabaseClient = null;
+            isSupabaseActive = false;
+            updateConnectionUI(false);
+            closeConfigModal();
+            showToast("Disconnected. Using LocalStorage fallback mode.");
+            loadBooksData();
+        }
+
+        // Modal Handlers
+        function openBookModal(id = null) {
+            const form = document.getElementById('bookForm');
+            form.reset();
+
+            if (id) {
+                const book = booksData.find(b => b.id === id);
+                if (book) {
+                    document.getElementById('bookModalTitle').innerText = 'Edit Book';
+                    document.getElementById('bookId').value = book.id;
+                    document.getElementById('bookTitle').value = book.title || '';
+                    document.getElementById('bookAuthor').value = book.author || '';
+                    document.getElementById('bookGenre').value = book.genre || 'Fiction';
+                    document.getElementById('bookReview').value = book.review || '';
+                    setFormRating(book.rating || 5);
+                }
+            } else {
+                document.getElementById('bookModalTitle').innerText = 'Add New Book';
+                document.getElementById('bookId').value = '';
+                setFormRating(5);
+            }
+
+            document.getElementById('bookModal').classList.remove('hidden');
+        }
+
+        function closeBookModal() {
+            document.getElementById('bookModal').classList.add('hidden');
+        }
+
+        function openConfigModal() {
+            document.getElementById('configModal').classList.remove('hidden');
+        }
+
+        function closeConfigModal() {
+            document.getElementById('configModal').classList.add('hidden');
+        }
+
+        function openSqlModal() {
+            document.getElementById('sqlModal').classList.remove('hidden');
+        }
+
+        function closeSqlModal() {
+            document.getElementById('sqlModal').classList.add('hidden');
+        }
+
+        function dismissBanner() {
+            document.getElementById('connectionBanner').classList.add('hidden');
+        }
+
+        // Copy SQL Script Utility
+        function copySqlToClipboard() {
+            const sqlText = `CREATE TABLE IF NOT EXISTS books (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  author TEXT,
+  rating INT DEFAULT 5,
+  genre TEXT,
+  review TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE books ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public access" 
+ON books FOR ALL 
+USING (true) 
+WITH CHECK (true);`;
+
+            navigator.clipboard.writeText(sqlText).then(() => {
+                showToast("SQL query copied to clipboard!");
+            }).catch(err => {
+                // Fallback copy execution
+                const textarea = document.createElement('textarea');
+                textarea.value = sqlText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast("SQL query copied to clipboard!");
+            });
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            
-            const bgColor = type === 'success' ? 'bg-[#223030] text-[#E8D9CD]' : 'bg-[#523D35] text-[#EFEFE9]';
-            
-            toast.className = `${bgColor} px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 border border-[#BBA58F] transition-all transform translate-y-2 opacity-0 pointer-events-auto`;
-            toast.innerHTML = `
-                <i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" class="w-4 h-4"></i>
-                <span>${escapeHtml(message)}</span>
-            `;
+
+            let bgClass = 'bg-[#223030] text-[#EFEFE9] border-[#BBA58F]';
+            let icon = 'fa-circle-check text-emerald-400';
+
+            if (type === 'error') {
+                bgClass = 'bg-rose-900 text-white border-rose-700';
+                icon = 'fa-circle-exclamation text-rose-300';
+            } else if (type === 'warning') {
+                bgClass = 'bg-amber-900 text-white border-amber-600';
+                icon = 'fa-triangle-exclamation text-amber-300';
+            }
+
+            toast.className = `px-4 py-3 rounded-xl border shadow-lg text-xs font-semibold flex items-center gap-2.5 transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i> <span>${escapeHtml(message)}</span>`;
 
             container.appendChild(toast);
-            lucide.createIcons();
 
-            setTimeout(() => {
+            // Animate In
+            requestAnimationFrame(() => {
                 toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
+            });
 
+            // Remove after 3.5s
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 3500);
         }
 
-        // Helper to prevent HTML Injection
+        // HTML Sanitizer helper
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
-            });
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
         }
     </script>
 </body>
