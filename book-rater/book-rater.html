@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literary Nook - Book Rater</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- FontAwesome for star icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        palette: {
+                            dark: '#223030',       // Dark Slate Black
+                            espresso: '#523D35',   // Deep Espresso Brown
+                            sage: '#959D90',       // Muted Sage Green
+                            taupe: '#BBA58F',      // Warm Taupe / Sand
+                            cream: '#E8D9CD',      // Cream / Light Beige
+                            bg: '#EFEFE9'          // Off-white Background
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #EFEFE9;
+            color: #223030;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .font-serif-title {
+            font-family: 'Cinzel', serif;
+        }
+        .star-rating {
+            display: inline-flex;
+            flex-direction: row-reverse;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            color: #BBA58F;
+            font-size: 1.5rem;
+            padding: 0 0.15rem;
+            cursor: pointer;
+            transition: color 0.15s ease-in-out;
+        }
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #523D35;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #EFEFE9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #BBA58F;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #959D90;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-[#223030] text-[#E8D9CD] shadow-lg sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-[#523D35] rounded-xl border border-[#BBA58F]/30 shadow-md">
+                    <i data-lucide="book-open-check" class="w-7 h-7 text-[#E8D9CD]"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold font-serif-title tracking-wide text-[#E8D9CD]">LITERARY NOOK</h1>
+                    <p class="text-xs text-[#959D90] font-medium tracking-wider uppercase">Personal Book Journal & Rating Companion</p>
+                </div>
+            </div>
+            <button onclick="scrollToForm()" class="bg-[#523D35] hover:bg-[#BBA58F] text-[#EFEFE9] hover:text-[#223030] px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform active:scale-95">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Add New Book</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+
+        <!-- Stats Bar -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-[#E8D9CD] p-5 rounded-xl border border-[#BBA58F] shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#523D35]">Total Books</p>
+                    <p id="stat-total" class="text-3xl font-bold text-[#223030] font-serif-title mt-1">0</p>
+                </div>
+                <div class="p-3 bg-[#959D90]/20 rounded-full text-[#223030]">
+                    <i data-lucide="library" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <div class="bg-[#E8D9CD] p-5 rounded-xl border border-[#BBA58F] shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#523D35]">Average Rating</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <p id="stat-avg" class="text-3xl font-bold text-[#223030] font-serif-title">0.0</p>
+                        <span class="text-xs text-[#523D35] font-medium">/ 5.0</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-[#959D90]/20 rounded-full text-[#523D35]">
+                    <i data-lucide="star" class="w-6 h-6 fill-current"></i>
+                </div>
+            </div>
+
+            <div class="bg-[#E8D9CD] p-5 rounded-xl border border-[#BBA58F] shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#523D35]">Top Rated Genre</p>
+                    <p id="stat-genre" class="text-lg font-bold text-[#223030] font-serif-title mt-1 truncate max-w-[180px]">N/A</p>
+                </div>
+                <div class="p-3 bg-[#959D90]/20 rounded-full text-[#223030]">
+                    <i data-lucide="bookmark" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Left Side: Add / Edit Form -->
+            <section id="form-container" class="lg:col-span-5 bg-[#E8D9CD] p-6 rounded-2xl border border-[#BBA58F] shadow-md self-start sticky top-24">
+                <div class="flex items-center justify-between mb-5 pb-3 border-b border-[#BBA58F]">
+                    <h2 id="form-title" class="text-xl font-bold font-serif-title text-[#223030] flex items-center gap-2">
+                        <i data-lucide="pen-tool" class="w-5 h-5 text-[#523D35]"></i>
+                        <span>Add New Review</span>
+                    </h2>
+                    <button id="cancel-edit-btn" onclick="resetForm()" class="hidden text-xs text-[#523D35] hover:text-[#223030] underline font-semibold">
+                        Cancel Edit
+                    </button>
+                </div>
+
+                <form id="book-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="book-id">
+
+                    <!-- Title Input -->
+                    <div>
+                        <label for="title" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Book Title <span class="text-red-700">*</span></label>
+                        <input type="text" id="title" required placeholder="e.g. The Shadow of the Wind" class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all">
+                    </div>
+
+                    <!-- Author Input -->
+                    <div>
+                        <label for="author" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Author <span class="text-red-700">*</span></label>
+                        <input type="text" id="author" required placeholder="e.g. Carlos Ruiz Zafón" class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all">
+                    </div>
+
+                    <!-- Genre Dropdown -->
+                    <div>
+                        <label for="genre" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Genre <span class="text-red-700">*</span></label>
+                        <select id="genre" required class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all">
+                            <option value="" disabled selected>Select a genre...</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Sci-Fi / Fantasy">Sci-Fi / Fantasy</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Thriller">Thriller</option>
+                            <option value="Historical Fiction">Historical Fiction</option>
+                            <option value="Biography">Biography</option>
+                            <option value="Self-Help">Self-Help</option>
+                            <option value="Philosophy">Philosophy</option>
+                            <option value="Poetry">Poetry</option>
+                        </select>
+                    </div>
+
+                    <!-- Star Rating Interactive Selector -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Rating <span class="text-red-700">*</span></label>
+                        <div class="flex items-center gap-3 bg-[#EFEFE9] p-3 rounded-lg border border-[#BBA58F]">
+                            <div class="star-rating text-2xl">
+                                <input type="radio" id="star5" name="rating" value="5" required />
+                                <label for="star5" title="5 stars"><i class="fa-solid fa-star"></i></label>
+                                
+                                <input type="radio" id="star4" name="rating" value="4" />
+                                <label for="star4" title="4 stars"><i class="fa-solid fa-star"></i></label>
+
+                                <input type="radio" id="star3" name="rating" value="3" />
+                                <label for="star3" title="3 stars"><i class="fa-solid fa-star"></i></label>
+
+                                <input type="radio" id="star2" name="rating" value="2" />
+                                <label for="star2" title="2 stars"><i class="fa-solid fa-star"></i></label>
+
+                                <input type="radio" id="star1" name="rating" value="1" />
+                                <label for="star1" title="1 star"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                            <span id="rating-label" class="text-xs text-[#959D90] font-semibold">Select rating</span>
+                        </div>
+                    </div>
+
+                    <!-- Notes / Review Area -->
+                    <div>
+                        <label for="review" class="block text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Review & Notes</label>
+                        <textarea id="review" rows="4" placeholder="Write your thoughts, key takeaways, or favorite quotes..." class="w-full px-3.5 py-2.5 rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-2 focus:ring-[#523D35] text-sm transition-all resize-none"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submit-btn" class="w-full py-3 px-4 bg-[#523D35] hover:bg-[#223030] text-[#EFEFE9] font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span id="submit-btn-text">Add Book Review</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Side: Book Shelf & Controls -->
+            <section class="lg:col-span-7 space-y-6">
+
+                <!-- Filter Controls Bar -->
+                <div class="bg-[#E8D9CD] p-4 rounded-xl border border-[#BBA58F] shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+                    
+                    <!-- Search Input -->
+                    <div class="relative w-full md:w-1/3">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#523D35]"></i>
+                        <input type="text" id="search-input" oninput="renderBooks()" placeholder="Search title or author..." class="w-full pl-9 pr-3 py-2 text-xs rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-1 focus:ring-[#523D35]">
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row w-full md:w-auto gap-3">
+                        <!-- Genre Filter -->
+                        <select id="filter-genre" onchange="renderBooks()" class="px-3 py-2 text-xs rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-1 focus:ring-[#523D35]">
+                            <option value="ALL">All Genres</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Non-Fiction">Non-Fiction</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Sci-Fi / Fantasy">Sci-Fi / Fantasy</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Thriller">Thriller</option>
+                            <option value="Historical Fiction">Historical Fiction</option>
+                            <option value="Biography">Biography</option>
+                            <option value="Self-Help">Self-Help</option>
+                            <option value="Philosophy">Philosophy</option>
+                            <option value="Poetry">Poetry</option>
+                        </select>
+
+                        <!-- Rating Sort Dropdown -->
+                        <select id="sort-rating" onchange="renderBooks()" class="px-3 py-2 text-xs rounded-lg bg-[#EFEFE9] border border-[#BBA58F] text-[#223030] focus:outline-none focus:ring-1 focus:ring-[#523D35]">
+                            <option value="NEWEST">Newest First</option>
+                            <option value="HIGHEST">Highest Rated</option>
+                            <option value="LOWEST">Lowest Rated</option>
+                            <option value="TITLE">Title (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Book Grid List -->
+                <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Dynamic Book Cards injected here -->
+                </div>
+
+                <!-- Empty State Message -->
+                <div id="empty-state" class="hidden bg-[#E8D9CD]/50 border-2 border-dashed border-[#BBA58F] rounded-2xl p-10 text-center space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-[#959D90]/20 flex items-center justify-center text-[#523D35]">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-lg font-bold font-serif-title text-[#223030]">No Books Found</h3>
+                    <p class="text-sm text-[#523D35] max-w-sm mx-auto">Try adjusting your filters or search terms, or add a new book to your library!</p>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- View Modal -->
+    <div id="view-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#E8D9CD] rounded-2xl border border-[#BBA58F] shadow-2xl max-w-lg w-full p-6 space-y-5 relative animate-fade-in">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-[#523D35] hover:text-[#223030] p-1">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div id="modal-content">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // Sample Pre-populated data
+        const initialBooks = [
+            {
+                id: '1',
+                title: 'Dune',
+                author: 'Frank Herbert',
+                genre: 'Sci-Fi / Fantasy',
+                rating: 5,
+                review: 'A magnificent masterpiece of world-building and political intrigue. The depth of culture and desert ecology is unparalleled.',
+                createdAt: new Date('2026-01-10').toISOString()
+            },
+            {
+                id: '2',
+                title: 'The Silent Patient',
+                author: 'Alex Michaelides',
+                genre: 'Thriller',
+                rating: 4,
+                review: 'A brilliant psychological thriller with a plot twist that completely caught me off guard. Highly recommended!',
+                createdAt: new Date('2026-02-14').toISOString()
+            },
+            {
+                id: '3',
+                title: 'Atomic Habits',
+                author: 'James Clear',
+                genre: 'Self-Help',
+                rating: 5,
+                review: 'Practical and actionable frameworks for building good habits and breaking bad ones. Small 1% gains compound fast.',
+                createdAt: new Date('2026-03-01').toISOString()
+            }
+        ];
+
+        let books = [];
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            loadBooks();
+            setupRatingListeners();
+            renderBooks();
+            lucide.createIcons();
+        });
+
+        // Load Books from LocalStorage
+        function loadBooks() {
+            const stored = localStorage.getItem('literary_nook_books');
+            if (stored) {
+                try {
+                    books = JSON.parse(stored);
+                } catch (e) {
+                    books = [...initialBooks];
+                }
+            } else {
+                books = [...initialBooks];
+                saveBooks();
+            }
+        }
+
+        // Save Books to LocalStorage
+        function saveBooks() {
+            localStorage.setItem('literary_nook_books', JSON.stringify(books));
+            updateStats();
+        }
+
+        // Setup Hover and Select Listeners for Star Input
+        function setupRatingListeners() {
+            const radios = document.querySelectorAll('input[name="rating"]');
+            const ratingLabel = document.getElementById('rating-label');
+            const labels = {
+                '1': '1 Star - Poor',
+                '2': '2 Stars - Fair',
+                '3': '3 Stars - Good',
+                '4': '4 Stars - Very Good',
+                '5': '5 Stars - Excellent'
+            };
+
+            radios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    ratingLabel.textContent = labels[e.target.value] || 'Select rating';
+                    ratingLabel.classList.add('text-[#223030]');
+                    ratingLabel.classList.remove('text-[#959D90]');
+                });
+            });
+        }
+
+        // Handle Add/Edit Form Submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('book-id').value;
+            const title = document.getElementById('title').value.trim();
+            const author = document.getElementById('author').value.trim();
+            const genre = document.getElementById('genre').value;
+            const review = document.getElementById('review').value.trim();
+
+            const ratingRadio = document.querySelector('input[name="rating"]:checked');
+            if (!ratingRadio) {
+                showToast('Please select a star rating!', 'error');
+                return;
+            }
+            const rating = parseInt(ratingRadio.value);
+
+            if (id) {
+                // Update Existing
+                const index = books.findIndex(b => b.id === id);
+                if (index !== -1) {
+                    books[index] = { ...books[index], title, author, genre, rating, review };
+                    showToast('Book updated successfully!', 'success');
+                }
+            } else {
+                // Create New
+                const newBook = {
+                    id: Date.now().toString(),
+                    title,
+                    author,
+                    genre,
+                    rating,
+                    review,
+                    createdAt: new Date().toISOString()
+                };
+                books.unshift(newBook);
+                showToast('Book added to library!', 'success');
+            }
+
+            saveBooks();
+            resetForm();
+            renderBooks();
+        }
+
+        // Edit Book Item
+        function editBook(id) {
+            const book = books.find(b => b.id === id);
+            if (!book) return;
+
+            document.getElementById('book-id').value = book.id;
+            document.getElementById('title').value = book.title;
+            document.getElementById('author').value = book.author;
+            document.getElementById('genre').value = book.genre;
+            document.getElementById('review').value = book.review;
+
+            const radio = document.querySelector(`input[name="rating"][value="${book.rating}"]`);
+            if (radio) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change'));
+            }
+
+            document.getElementById('form-title').innerHTML = `
+                <i data-lucide="edit-3" class="w-5 h-5 text-[#523D35]"></i>
+                <span>Edit Review</span>
+            `;
+            document.getElementById('submit-btn-text').textContent = 'Update Review';
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+
+            lucide.createIcons();
+            scrollToForm();
+        }
+
+        // Delete Book Item
+        function deleteBook(id) {
+            if (confirm('Are you sure you want to remove this book review?')) {
+                books = books.filter(b => b.id !== id);
+                saveBooks();
+                renderBooks();
+                showToast('Book deleted.', 'info');
+            }
+        }
+
+        // Reset Form to Add Mode
+        function resetForm() {
+            document.getElementById('book-form').reset();
+            document.getElementById('book-id').value = '';
+            document.getElementById('form-title').innerHTML = `
+                <i data-lucide="pen-tool" class="w-5 h-5 text-[#523D35]"></i>
+                <span>Add New Review</span>
+            `;
+            document.getElementById('submit-btn-text').textContent = 'Add Book Review';
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            
+            const ratingLabel = document.getElementById('rating-label');
+            ratingLabel.textContent = 'Select rating';
+            ratingLabel.classList.remove('text-[#223030]');
+            ratingLabel.classList.add('text-[#959D90]');
+
+            lucide.createIcons();
+        }
+
+        // Scroll to form helper
+        function scrollToForm() {
+            document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Render Stars Helper
+        function generateStarHTML(rating) {
+            let html = '<div class="flex text-[#523D35] gap-0.5 text-sm">';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    html += '<i class="fa-solid fa-star"></i>';
+                } else {
+                    html += '<i class="fa-regular fa-star text-[#BBA58F]"></i>';
+                }
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // Render Books Shelf & Apply Filters
+        function renderBooks() {
+            const grid = document.getElementById('books-grid');
+            const emptyState = document.getElementById('empty-state');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const genreFilter = document.getElementById('filter-genre').value;
+            const sortOption = document.getElementById('sort-rating').value;
+
+            // Filter
+            let filtered = books.filter(book => {
+                const matchesSearch = book.title.toLowerCase().includes(search) || book.author.toLowerCase().includes(search);
+                const matchesGenre = genreFilter === 'ALL' || book.genre === genreFilter;
+                return matchesSearch && matchesGenre;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortOption === 'HIGHEST') return b.rating - a.rating;
+                if (sortOption === 'LOWEST') return a.rating - b.rating;
+                if (sortOption === 'TITLE') return a.title.localeCompare(b.title);
+                return new Date(b.createdAt) - new Date(a.createdAt); // NEWEST
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = filtered.map(book => `
+                <div class="bg-[#E8D9CD] rounded-xl border border-[#BBA58F] p-4 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#959D90]/30 text-[#223030]">
+                                ${book.genre}
+                            </span>
+                            ${generateStarHTML(book.rating)}
+                        </div>
+                        <h3 class="font-serif-title font-bold text-lg text-[#223030] leading-snug line-clamp-1 group-hover:text-[#523D35] transition-colors">
+                            ${escapeHtml(book.title)}
+                        </h3>
+                        <p class="text-xs text-[#523D35] font-semibold mb-3">
+                            by ${escapeHtml(book.author)}
+                        </p>
+                        ${book.review ? `
+                            <p class="text-xs text-[#223030]/80 line-clamp-3 bg-[#EFEFE9] p-2.5 rounded-lg border border-[#BBA58F]/40 italic mb-3">
+                                "${escapeHtml(book.review)}"
+                            </p>
+                        ` : ''}
+                    </div>
+
+                    <div class="flex items-center justify-between border-t border-[#BBA58F]/40 pt-3 mt-2 text-xs">
+                        <button onclick="openModal('${book.id}')" class="text-[#523D35] hover:text-[#223030] font-semibold flex items-center gap-1 hover:underline">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i> Read More
+                        </button>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="editBook('${book.id}')" class="p-1.5 rounded-md hover:bg-[#959D90]/20 text-[#523D35] hover:text-[#223030] transition-colors" title="Edit">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteBook('${book.id}')" class="p-1.5 rounded-md hover:bg-red-100 text-red-700 transition-colors" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+            updateStats();
+        }
+
+        // Update Dashboard Statistics
+        function updateStats() {
+            document.getElementById('stat-total').textContent = books.length;
+
+            if (books.length === 0) {
+                document.getElementById('stat-avg').textContent = '0.0';
+                document.getElementById('stat-genre').textContent = 'N/A';
+                return;
+            }
+
+            // Average rating
+            const totalRating = books.reduce((acc, b) => acc + b.rating, 0);
+            const avg = (totalRating / books.length).toFixed(1);
+            document.getElementById('stat-avg').textContent = avg;
+
+            // Top Genre calculation
+            const genreCounts = {};
+            books.forEach(b => {
+                genreCounts[b.genre] = (genreCounts[b.genre] || 0) + 1;
+            });
+            let topGenre = 'N/A';
+            let maxCount = 0;
+            for (const [genre, count] of Object.entries(genreCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    topGenre = genre;
+                }
+            }
+            document.getElementById('stat-genre').textContent = topGenre;
+        }
+
+        // Open Detail Modal
+        function openModal(id) {
+            const book = books.find(b => b.id === id);
+            if (!book) return;
+
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex justify-between items-start gap-3">
+                        <div>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#959D90]/30 text-[#223030] mb-2">
+                                ${book.genre}
+                            </span>
+                            <h2 class="text-2xl font-bold font-serif-title text-[#223030]">${escapeHtml(book.title)}</h2>
+                            <p class="text-sm font-semibold text-[#523D35]">by ${escapeHtml(book.author)}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 bg-[#EFEFE9] p-3 rounded-lg border border-[#BBA58F]">
+                        ${generateStarHTML(book.rating)}
+                        <span class="text-sm font-bold text-[#223030] ml-2">${book.rating} out of 5 Stars</span>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-[#523D35] mb-1">Review & Notes</h4>
+                        <div class="bg-[#EFEFE9] p-4 rounded-xl border border-[#BBA58F] text-sm text-[#223030] whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
+                            ${book.review ? escapeHtml(book.review) : '<span class="italic text-[#959D90]">No detailed notes provided for this review.</span>'}
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-[#959D90] text-right font-medium">
+                        Added on ${new Date(book.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('view-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('view-modal').classList.add('hidden');
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-[#223030] text-[#E8D9CD]' : 'bg-[#523D35] text-[#EFEFE9]';
+            
+            toast.className = `${bgColor} px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 border border-[#BBA58F] transition-all transform translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" class="w-4 h-4"></i>
+                <span>${escapeHtml(message)}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Helper to prevent HTML Injection
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+    </script>
+</body>
+</html>
