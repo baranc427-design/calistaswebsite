@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CourseHub - Peer Academic Resource Platform</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                            950: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for clean UI */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed top-5 right-5 z-50 hidden items-center gap-3 px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border transition-all duration-300">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message" class="text-sm font-medium text-slate-200">Action performed successfully!</span>
+    </div>
+
+    <!-- Global Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+        <!-- Brand Logo & Institution Selector -->
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('feed')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                    <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+                        CourseHub
+                    </span>
+                    <span class="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest text-indigo-400 ml-1.5 px-1.5 py-0.5 bg-indigo-950/80 border border-indigo-800/60 rounded">
+                        Static HTML
+                    </span>
+                </div>
+            </div>
+
+            <!-- Institution Picker -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/80 text-xs">
+                <i class="fa-solid fa-building text-indigo-400"></i>
+                <select id="institution-select" onchange="handleInstitutionChange(this.value)" class="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Global Search Input -->
+        <div class="flex-1 max-w-md hidden sm:block">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input
+                    type="text"
+                    id="search-input"
+                    oninput="handleSearchInput(this.value)"
+                    placeholder="Search notes, practice exams, syllabus or study methods..."
+                    class="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                >
+                <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center gap-3">
+            <button onclick="openModal('upload-modal')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all active:scale-95">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span class="hidden sm:inline">Upload Material</span>
+            </button>
+
+            <button onclick="openModal('enroll-modal')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700/80 text-slate-200 text-xs font-medium border border-slate-700 transition-all">
+                <i class="fa-solid fa-plus text-indigo-400"></i>
+                <span class="hidden sm:inline">Add Class</span>
+            </button>
+
+            <!-- User Avatar Badge -->
+            <div class="flex items-center gap-2 pl-2 border-l border-slate-800">
+                <div class="w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xs font-bold text-indigo-300">
+                    GH
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout Workspace -->
+    <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 gap-6">
+
+        <!-- Sidebar Section -->
+        <aside class="w-full md:w-64 shrink-0 flex flex-col gap-6">
+            <!-- Navigation View Selector -->
+            <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-2 flex flex-col gap-1 shadow-sm">
+                <button id="nav-feed" onclick="switchTab('feed')" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all bg-indigo-600 text-white shadow-md font-semibold">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>Enrolled Feed</span>
+                    </div>
+                    <span id="badge-feed-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800/80 text-slate-300 font-bold">0</span>
+                </button>
+
+                <button id="nav-methods" onclick="switchTab('methods')" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                        <span>Study Methods Hub</span>
+                    </div>
+                    <span id="badge-methods-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold">0</span>
+                </button>
+
+                <button id="nav-saved" onclick="switchTab('saved')" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-bookmark text-cyan-400"></i>
+                        <span>Saved Library</span>
+                    </div>
+                    <span id="badge-saved-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold">0</span>
+                </button>
+
+                <button id="nav-honor" onclick="switchTab('honor')" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        <span>Academic Honor Code</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Enrolled Classes Manager Box -->
+            <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-book-open text-indigo-400"></i>
+                        My Enrolled Classes (<span id="enrolled-count-header">0</span>)
+                    </span>
+                    <button onclick="openModal('enroll-modal')" class="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300">
+                        + Add Class
+                    </button>
+                </div>
+
+                <div id="enrolled-classes-list" class="flex flex-col gap-2">
+                    <!-- Dynamic List of Enrolled Courses -->
+                </div>
+            </div>
+
+            <!-- GitHub Hosting Notice -->
+            <div class="bg-gradient-to-br from-indigo-950/40 via-slate-900 to-slate-900 border border-indigo-900/40 rounded-2xl p-4 text-xs text-slate-300 flex flex-col gap-2">
+                <div class="flex items-center gap-2 text-indigo-400 font-semibold">
+                    <i class="fa-brands fa-github text-base"></i>
+                    <span>GitHub Pages Compatible</span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    This standalone app is pure client-side HTML/JS. Push this single file to any GitHub repository to deploy live instantly.
+                </p>
+            </div>
+        </aside>
+
+        <!-- Main Content Center Screen -->
+        <main class="flex-1 flex flex-col gap-6 min-w-0">
+
+            <!-- Banner Header Area -->
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span id="current-inst-label" class="text-xs font-bold uppercase tracking-wider text-indigo-400">
+                            Stanford University
+                        </span>
+                        <span class="text-slate-600">•</span>
+                        <span id="current-scope-subtext" class="text-xs text-slate-400">
+                            Showing materials across all active enrollments
+                        </span>
+                    </div>
+                    <h1 id="feed-title" class="text-2xl font-extrabold text-white tracking-tight">
+                        Enrolled Classes Dashboard
+                    </h1>
+                </div>
+
+                <div class="flex items-center gap-2.5">
+                    <button onclick="openModal('upload-modal')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-plus"></i>
+                        Upload File to Class
+                    </button>
+                    <button onclick="openModal('new-method-modal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 flex items-center gap-2 transition-all">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                        Share Method
+                    </button>
+                </div>
+            </div>
+
+            <!-- Category Filter Bar (Visible in Feed view) -->
+            <div id="category-filter-bar" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <!-- Dynamically populated category buttons -->
+            </div>
+
+            <!-- TAB CONTAINER 1: Resource Cards Feed -->
+            <div id="tab-feed" class="flex flex-col gap-4">
+                <div id="resource-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Dynamically populated resource cards -->
+                </div>
+            </div>
+
+            <!-- TAB CONTAINER 2: Study Methods Hub -->
+            <div id="tab-methods" class="hidden flex-col gap-4">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                            Peer Learning Strategies & Active Recall
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Proven study routines, interval schedules, and Feynman technique breakdowns shared by students.
+                        </p>
+                    </div>
+                    <button onclick="openModal('new-method-modal')" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-all shrink-0">
+                        + Post Strategy
+                    </button>
+                </div>
+
+                <div id="study-methods-list" class="flex flex-col gap-4">
+                    <!-- Dynamically populated study methods -->
+                </div>
+            </div>
+
+            <!-- TAB CONTAINER 3: Saved Library -->
+            <div id="tab-saved" class="hidden flex-col gap-4">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+                    <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bookmark text-cyan-400"></i>
+                        Bookmarked Resources & Exam Prep
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                        Quick access repository for key formula cheat sheets, lecture summaries, and practice problem sets.
+                    </p>
+                </div>
+
+                <div id="saved-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Dynamically populated saved cards -->
+                </div>
+            </div>
+
+            <!-- TAB CONTAINER 4: Academic Honor Code Policy -->
+            <div id="tab-honor" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-6 flex-col gap-5">
+                <div class="flex items-center gap-3 pb-4 border-b border-slate-800">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-950/80 border border-emerald-800/60 flex items-center justify-center text-emerald-400 text-xl">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Academic Integrity & Honor Code Guidelines</h2>
+                        <p class="text-xs text-slate-400">CourseHub standard policy for peer educational material sharing</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-emerald-950/20 border border-emerald-900/40 rounded-xl p-4 flex flex-col gap-2">
+                        <h4 class="font-bold text-emerald-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                            Allowed Materials
+                        </h4>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1 pl-1">
+                            <li>Original handwritten lecture notes & typed summaries</li>
+                            <li>Student-created practice problems and worked solutions</li>
+                            <li>Study flashcards, formula cheat sheets, and mind maps</li>
+                            <li>General study techniques and active recall schedules</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-rose-950/20 border border-rose-900/40 rounded-xl p-4 flex flex-col gap-2">
+                        <h4 class="font-bold text-rose-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                            Strictly Prohibited
+                        </h4>
+                        <ul class="list-disc list-inside text-slate-300 space-y-1 pl-1">
+                            <li>Live exam, midterm, or quiz questions during test windows</li>
+                            <li>Graded homework solutions violating instructor policies</li>
+                            <li>Copyrighted textbook PDF scans or publisher test banks</li>
+                            <li>Unverified executable files or malware</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/60 rounded-xl p-4 border border-slate-800 text-xs text-slate-400 leading-relaxed">
+                    <strong class="text-slate-200">Integrity Hash & Verification:</strong> All uploaded files undergo automated checks. Students can flag any non-compliant material for immediate community moderation.
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL 1: Document Preview & Annotation Modal -->
+    <div id="preview-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-slate-800 bg-slate-900 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-xl bg-indigo-950 border border-indigo-800 text-indigo-400">
+                        <i class="fa-solid fa-file-lines text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 id="modal-preview-title" class="text-sm font-bold text-white line-clamp-1">Document Title</h2>
+                        <p id="modal-preview-meta" class="text-[11px] text-slate-400">Uploaded by Student</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="modal-preview-ai-btn" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>AI Assistant</span>
+                    </button>
+                    <button onclick="downloadCurrentDocument()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700" title="Download Document">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <button onclick="closeModal('preview-modal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content & Annotation Workspace -->
+            <div class="flex-1 overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-slate-950/40">
+                <!-- Main Viewer Box -->
+                <div id="modal-preview-body" class="lg:col-span-2 bg-slate-900 rounded-xl border border-slate-800 p-5 overflow-y-auto max-h-[55vh] text-xs text-slate-300 font-mono leading-relaxed whitespace-pre-wrap select-text">
+                    <!-- Text content -->
+                </div>
+
+                <!-- Annotation Sidebar -->
+                <div class="flex flex-col gap-4">
+                    <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 flex flex-col gap-3">
+                        <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-highlighter text-amber-400"></i>
+                            Student Annotations (<span id="preview-anno-count">0</span>)
+                        </h4>
+
+                        <div id="preview-annotations-list" class="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                            <!-- Annotations dynamic -->
+                        </div>
+
+                        <!-- Add Annotation Form -->
+                        <div class="flex gap-2 mt-1">
+                            <input
+                                type="text"
+                                id="new-annotation-input"
+                                placeholder="Add inline note..."
+                                class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                                onkeydown="if(event.key === 'Enter') submitAnnotation()"
+                            >
+                            <button onclick="submitAnnotation()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 text-xs text-slate-400 flex flex-col gap-2">
+                        <span class="font-bold text-slate-300">File Integrity Hash:</span>
+                        <code class="text-[10px] bg-slate-950 p-1.5 rounded text-indigo-300 overflow-x-auto">
+                            sha256-a8f9c12b7e9411c8...
+                        </code>
+                        <p class="text-[10px] text-slate-500">Verified virus-free & compliant with honor code.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Upload File Modal -->
+    <div id="upload-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 flex flex-col gap-5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
+                    Upload Material to Class
+                </h2>
+                <button onclick="closeModal('upload-modal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="upload-form" onsubmit="handleUploadSubmit(event)" class="flex flex-col gap-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Target Class *</label>
+                    <select id="upload-course-select" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Category *</label>
+                    <select id="upload-category-select" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Title *</label>
+                    <input type="text" id="upload-title" required placeholder="e.g., Midterm 1 Binary Trees Cheat Sheet" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Description / Notes *</label>
+                    <textarea id="upload-desc" required rows="3" placeholder="Key topics covered, worked example problems..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                </div>
+
+                <div class="border-2 border-dashed border-slate-800 rounded-xl p-4 text-center bg-slate-950/40 hover:border-indigo-500/50 transition-colors cursor-pointer flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-file-circle-plus text-indigo-400 text-2xl"></i>
+                    <p class="text-slate-300 font-medium">Select or drag & drop file (PDF, PNG, DOCX)</p>
+                    <span class="text-[10px] text-slate-500">Max file size: 25MB • Scanned automatically</span>
+                </div>
+
+                <div class="flex items-start gap-2 pt-2 border-t border-slate-800">
+                    <input type="checkbox" id="honor-checkbox" required class="mt-0.5 rounded bg-slate-950 border-slate-800 text-indigo-600 focus:ring-0">
+                    <label for="honor-checkbox" class="text-[11px] text-slate-400 leading-tight">
+                        I certify this resource follows my university's Honor Code and does not violate copyright or active test rules.
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('upload-modal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30">
+                        Publish Material
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Enroll Course Modal -->
+    <div id="enroll-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 flex flex-col gap-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h2 class="text-base font-bold text-white">Course Enrollment Catalog</h2>
+                    <p id="enroll-modal-inst-name" class="text-xs text-slate-400">Stanford University</p>
+                </div>
+                <button onclick="closeModal('enroll-modal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="enroll-catalog-list" class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Post Study Method Modal -->
+    <div id="new-method-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 flex flex-col gap-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                    Post Learning Strategy
+                </h2>
+                <button onclick="closeModal('new-method-modal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="new-method-form" onsubmit="handleMethodSubmit(event)" class="flex flex-col gap-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Strategy Title *</label>
+                    <input type="text" id="method-title" required placeholder="e.g., The 3-Pass Active Recall Technique for Algorithms" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-1">Technique Type *</label>
+                        <select id="method-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200">
+                            <option value="Active Recall">Active Recall</option>
+                            <option value="Pomodoro Routine">Pomodoro Routine</option>
+                            <option value="Feynman Technique">Feynman Technique</option>
+                            <option value="Spaced Repetition">Spaced Repetition</option>
+                            <option value="Blurting Method">Blurting Method</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-300 mb-1">Target Course</label>
+                        <select id="method-course-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-300 mb-1">Method Breakdown & Rules *</label>
+                    <textarea id="method-content" required rows="4" placeholder="Detail your step-by-step active recall method, time intervals, or tips..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500 resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                    <button type="button" onclick="closeModal('new-method-modal')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shadow-md">
+                        Publish Strategy
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: AI Study Assistant Modal -->
+    <div id="ai-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md items-center justify-center p-4">
+        <div class="bg-slate-900 border border-indigo-500/40 rounded-2xl w-full max-w-2xl p-6 flex flex-col gap-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 rounded-xl bg-indigo-600/30 border border-indigo-500/50 text-indigo-300">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg animate-pulse"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-white">CourseHub AI Study Assistant</h2>
+                        <p id="ai-modal-resource-title" class="text-xs text-slate-400">Document Title</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('ai-modal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Mode Switcher Tabs -->
+            <div class="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+                <button id="ai-tab-summary" onclick="triggerAIAssistantMode('summary')" class="flex-1 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white transition-all">
+                    Bullet Summary
+                </button>
+                <button id="ai-tab-quiz" onclick="triggerAIAssistantMode('quiz')" class="flex-1 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-slate-200 transition-all">
+                    Practice Quiz
+                </button>
+                <button id="ai-tab-feynman" onclick="triggerAIAssistantMode('feynman')" class="flex-1 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-slate-200 transition-all">
+                    Feynman Breakdown
+                </button>
+            </div>
+
+            <!-- AI Output Box -->
+            <div id="ai-output-box" class="bg-slate-950 rounded-xl border border-slate-800/80 p-5 min-h-[220px] max-h-[50vh] overflow-y-auto text-xs text-slate-200 font-sans leading-relaxed whitespace-pre-wrap">
+                <!-- Dynamic AI output -->
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+                <span>Powered by CourseHub Client-Side AI Engine</span>
+                <button onclick="copyAIOutput()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold flex items-center gap-1.5">
+                    <i class="fa-regular fa-copy"></i>
+                    Copy Text
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Engine -->
+    <script>
+        // Static Mock Data Definitions
+        const INSTITUTIONS = [
+            { id: 'inst-1', name: 'Stanford University', location: 'Stanford, CA' },
+            { id: 'inst-2', name: 'MIT - Massachusetts Institute of Technology', location: 'Cambridge, MA' },
+            { id: 'inst-3', name: 'UC Berkeley', location: 'Berkeley, CA' },
+            { id: 'inst-4', name: 'Oxford University', location: 'Oxford, UK' }
+        ];
+
+        const CATEGORIES = [
+            { id: 'all', label: 'All Resources', icon: 'fa-layer-group' },
+            { id: 'Lecture Notes', label: 'Lecture Notes', icon: 'fa-file-lines' },
+            { id: 'Exam Prep', label: 'Exam Prep & Reviews', icon: 'fa-award' },
+            { id: 'Practice Problems', label: 'Practice Problems', icon: 'fa-chart-column' },
+            { id: 'Flashcard Decks', label: 'Flashcards & Cheat Sheets', icon: 'fa-fire' },
+            { id: 'Lab Reports', label: 'Lab Reports & Syllabus', icon: 'fa-book-open' }
+        ];
+
+        const COURSES = [
+            { id: 'cs101', institutionId: 'inst-1', code: 'CS 101', name: 'Intro to Computer Science & Algorithms', term: 'Fall 2026', color: 'from-blue-500 to-cyan-500', count: 342 },
+            { id: 'math201', institutionId: 'inst-1', code: 'MATH 201', name: 'Linear Algebra & Differential Equations', term: 'Fall 2026', color: 'from-indigo-500 to-purple-500', count: 289 },
+            { id: 'chem102', institutionId: 'inst-1', code: 'CHEM 102', name: 'General Organic Chemistry II', term: 'Fall 2026', color: 'from-emerald-500 to-teal-500', count: 215 },
+            { id: 'econ101', institutionId: 'inst-1', code: 'ECON 101', name: 'Principles of Microeconomics', term: 'Fall 2026', color: 'from-amber-500 to-orange-500', count: 410 },
+            { id: 'phys150', institutionId: 'inst-1', code: 'PHYS 150', name: 'University Physics: Mechanics', term: 'Fall 2026', color: 'from-rose-500 to-pink-500', count: 198 }
+        ];
+
+        let state = {
+            selectedInstId: 'inst-1',
+            enrolledCourseIds: ['cs101', 'math201', 'chem102'],
+            activeTab: 'feed', // 'feed', 'methods', 'saved', 'honor'
+            selectedCourseFilter: 'all',
+            selectedCategoryFilter: 'all',
+            searchQuery: '',
+            savedResourceIds: ['res-1', 'res-3'],
+            previewResourceId: null,
+            aiResourceId: null,
+            aiMode: 'summary',
+            
+            resources: [
+                {
+                    id: 'res-1',
+                    courseId: 'cs101',
+                    uploaderName: 'Alex Rivera',
+                    uploaderRole: 'Teaching Assistant',
+                    title: 'Lecture 4: Binary Search Trees, Balanced Trees & Recursion Depth',
+                    description: 'Detailed annotations on tree traversals, AVL self-balancing algorithms, and space-time complexity analysis. Includes code snippets in C++.',
+                    category: 'Lecture Notes',
+                    fileType: 'PDF',
+                    fileSize: '3.4 MB',
+                    createdAt: '2 hours ago',
+                    upvotes: 28,
+                    isUpvoted: false,
+                    contentPreview: `# CS 101: Lecture 4 - Binary Search Trees & Recursion\n\n## 1. Key Definitions\n- Binary Search Tree (BST): A node-based tree data structure.\n- Left Subtree: Contains keys strictly less than the root.\n- Right Subtree: Contains keys strictly greater than the root.\n\n## 2. In-Order Traversal (C++)\n\`\`\`cpp\nvoid inOrder(Node* root) {\n    if (root == nullptr) return;\n    inOrder(root->left);\n    cout << root->data << " ";\n    inOrder(root->right);\n}\n\`\`\`\n\n## 3. Time Complexity Analysis\n- Search Average: O(log n), Worst Case: O(n)\n- Insertion Average: O(log n)\n- Self-Balancing (AVL): Guarantees O(log n) worst case operations.`,
+                    annotations: [
+                        { id: 'a1', text: 'Important for Midterm 1! Check worst-case degenerate tree condition.', author: 'Alex Rivera' }
+                    ]
+                },
+                {
+                    id: 'res-2',
+                    courseId: 'math201',
+                    uploaderName: 'Sophia Chen',
+                    uploaderRole: 'Senior Student',
+                    title: 'MATH 201 Midterm 1 Practice Exam & Step-by-Step Solutions',
+                    description: 'Comprehensive practice set covering Eigenvalues, Eigenvectors, Diagonalization, and Gram-Schmidt orthogonalization.',
+                    category: 'Practice Problems',
+                    fileType: 'PDF',
+                    fileSize: '5.1 MB',
+                    createdAt: '1 day ago',
+                    upvotes: 45,
+                    isUpvoted: true,
+                    contentPreview: `# MATH 201: Midterm Practice Set\n\n## Problem 1: Eigenvalues Calculation\nGiven matrix A = [[4, 1], [2, 3]], find all eigenvalues λ and corresponding eigenvectors.\n\n### Solution:\n1. Compute det(A - λI) = 0\n2. det([[4-λ, 1], [2, 3-λ]]) = (4-λ)(3-λ) - 2 = λ² - 7λ + 10 = 0\n3. Factoring gives (λ - 5)(λ - 2) = 0\n4. Eigenvalues are λ₁ = 5, λ₂ = 2.\n\n## Problem 2: Gram-Schmidt Process\nApply Gram-Schmidt orthogonalization to v₁ = [1, 1, 0]ᵀ and v₂ = [2, 0, 1]ᵀ.`,
+                    annotations: []
+                },
+                {
+                    id: 'res-3',
+                    courseId: 'chem102',
+                    uploaderName: 'Marcus Vance',
+                    uploaderRole: 'Peer Tutor',
+                    title: 'Organic Chemistry II: Reaction Mechanisms Mega Cheat Sheet',
+                    description: 'Visual summary of SN1, SN2, E1, E2 mechanisms, electrophilic aromatic substitution, and aldehyde/ketone nucleophilic additions.',
+                    category: 'Flashcard Decks',
+                    fileType: 'PNG',
+                    fileSize: '8.2 MB',
+                    createdAt: '3 days ago',
+                    upvotes: 62,
+                    isUpvoted: false,
+                    contentPreview: `# CHEM 102: Reaction Mechanism Quick Guide\n\n## SN1 vs SN2 Comparison\n- SN1: Unimolecular (1st order), Polar Protic solvent, 3° > 2° substrate.\n- SN2: Bimolecular (2nd order), Polar Aprotic solvent, 1° > 2° substrate, Inversion of configuration (Walden).\n\n## Key Reagents\n- PCC: Oxidizes 1° alcohols to aldehydes.\n- CrO3 / H2SO4 (Jones): Oxidizes 1° alcohols to carboxylic acids.`,
+                    annotations: []
+                }
+            ],
+
+            studyMethods: [
+                {
+                    id: 'sm-1',
+                    authorName: 'Liam Patel',
+                    authorMajor: 'Computer Science & Math',
+                    courseId: 'cs101',
+                    title: 'The 3-Pass Active Recall Strategy for Proofs & Algorithms',
+                    methodType: 'Active Recall',
+                    content: "When studying complex algorithm proofs or data structures:\n1. Pass 1 (Skim & Map): Read without taking notes. Build a mental map.\n2. Pass 2 (Blurting): Close notes. Write down code/proof from scratch on a blank whiteboard.\n3. Pass 3 (Targeted Error Patching): Compare with red ink and re-test only missed steps after 24 hours.",
+                    upvotes: 84,
+                    isUpvoted: true,
+                    comments: [
+                        { id: 'c1', author: 'Maya Lin', text: 'Changed my grade on CS 101! Whiteboard blurting works wonders.', date: 'Yesterday' }
+                    ]
+                },
+                {
+                    id: 'sm-2',
+                    authorName: 'Dr. Sarah Jenkins',
+                    authorMajor: 'Cognitive Science Research',
+                    courseId: 'chem102',
+                    title: 'Spaced Repetition Reaction Matrix for Organic Chem II',
+                    methodType: 'Spaced Repetition',
+                    content: "Organic Chemistry reactions require active retrieval, not passive reading.\n- Create 2x2 flashcards: Reaction name on front; Nucleophile, Electrophile, Solvent, and Mechanism on back.\n- Spacing intervals: Day 1, Day 3, Day 7, Day 14, Day 30.\n- Reset incorrect cards to Day 1 immediately.",
+                    upvotes: 112,
+                    isUpvoted: false,
+                    comments: []
+                }
+            ]
+        };
+
+        // DOM Initialization on window load
+        window.onload = function() {
+            initInstitutionDropdown();
+            renderCategoryFilters();
+            renderEnrolledClassesList();
+            renderFeed();
+            renderStudyMethods();
+            renderSavedLibrary();
+            populateFormDropdowns();
+            updateBadges();
+        };
+
+        // Toast Notification Helper
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
+                toast.className = "fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border bg-emerald-950/90 text-emerald-200 border-emerald-500/50 transition-all duration-300";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-indigo-400";
+                toast.className = "fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border bg-indigo-950/90 text-indigo-200 border-indigo-500/50 transition-all duration-300";
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+
+        // Institution Handlers
+        function initInstitutionDropdown() {
+            const select = document.getElementById('institution-select');
+            select.innerHTML = INSTITUTIONS.map(inst => 
+                `<option value="${inst.id}" class="bg-slate-900 text-slate-200">${inst.name}</option>`
+            ).join('');
+        }
+
+        function handleInstitutionChange(instId) {
+            state.selectedInstId = instId;
+            const inst = INSTITUTIONS.find(i => i.id === instId);
+            document.getElementById('current-inst-label').innerText = inst.name;
+            showToast(`Switched institution to ${inst.name}`);
+        }
+
+        // Search Input Handler
+        function handleSearchInput(val) {
+            state.searchQuery = val.trim().toLowerCase();
+            const clearBtn = document.getElementById('clear-search-btn');
+            if (state.searchQuery) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            renderFeed();
+            renderStudyMethods();
+            renderSavedLibrary();
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            handleSearchInput('');
+        }
+
+        // Navigation Switcher
+        function switchTab(tabName) {
+            state.activeTab = tabName;
+            
+            // Hide all tab containers
+            document.getElementById('tab-feed').classList.add('hidden');
+            document.getElementById('tab-methods').classList.add('hidden');
+            document.getElementById('tab-saved').classList.add('hidden');
+            document.getElementById('tab-honor').classList.add('hidden');
+            document.getElementById('category-filter-bar').classList.add('hidden');
+
+            // Reset navigation button active styling
+            ['feed', 'methods', 'saved', 'honor'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if (btn) {
+                    btn.className = "flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60";
+                }
+            });
+
+            // Highlight selected
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            if (activeBtn) {
+                activeBtn.className = "flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all bg-indigo-600 text-white shadow-md font-semibold";
+            }
+
+            // Show active container
+            if (tabName === 'feed') {
+                document.getElementById('tab-feed').classList.remove('hidden');
+                document.getElementById('category-filter-bar').classList.remove('hidden');
+                document.getElementById('feed-title').innerText = state.selectedCourseFilter === 'all' 
+                    ? "Enrolled Classes Dashboard" 
+                    : (COURSES.find(c => c.id === state.selectedCourseFilter)?.code || "Class Feed");
+            } else if (tabName === 'methods') {
+                document.getElementById('tab-methods').classList.remove('hidden');
+                document.getElementById('feed-title').innerText = "Study Methods & Active Recall Hub";
+            } else if (tabName === 'saved') {
+                document.getElementById('tab-saved').classList.remove('hidden');
+                document.getElementById('feed-title').innerText = "Bookmarked Study Materials";
+            } else if (tabName === 'honor') {
+                document.getElementById('tab-honor').classList.remove('hidden');
+                document.getElementById('feed-title').innerText = "Academic Integrity Policy";
+            }
+        }
+
+        // Category Filters Renderer
+        function renderCategoryFilters() {
+            const bar = document.getElementById('category-filter-bar');
+            bar.innerHTML = CATEGORIES.map(cat => {
+                const isActive = state.selectedCategoryFilter === cat.id;
+                return `
+                    <button onclick="selectCategoryFilter('${cat.id}')" class="px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
+                        isActive 
+                            ? 'bg-indigo-600/90 text-white border border-indigo-500 shadow-md shadow-indigo-600/20' 
+                            : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }">
+                        <i class="fa-solid ${cat.icon}"></i>
+                        <span>${cat.label}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectCategoryFilter(catId) {
+            state.selectedCategoryFilter = catId;
+            renderCategoryFilters();
+            renderFeed();
+        }
+
+        // Enrolled Classes Sidebar Manager
+        function renderEnrolledClassesList() {
+            const container = document.getElementById('enrolled-classes-list');
+            const enrolledCourses = COURSES.filter(c => state.enrolledCourseIds.includes(c.id));
+            document.getElementById('enrolled-count-header').innerText = enrolledCourses.length;
+
+            if (enrolledCourses.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 text-center rounded-xl bg-slate-950/60 border border-dashed border-slate-800">
+                        <p class="text-xs text-slate-400 mb-2">No courses added yet.</p>
+                        <button onclick="openModal('enroll-modal')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold">
+                            Browse Catalog
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = enrolledCourses.map(course => {
+                const isSelected = state.activeTab === 'feed' && state.selectedCourseFilter === course.id;
+                const resourceCount = state.resources.filter(r => r.courseId === course.id).length;
+
+                return `
+                    <div onclick="filterByCourse('${course.id}')" class="group relative flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                        isSelected 
+                            ? 'bg-slate-800 border-indigo-500/80 text-white shadow-sm' 
+                            : 'bg-slate-950/50 border-slate-800/80 text-slate-300 hover:bg-slate-800/50 hover:border-slate-700'
+                    }">
+                        <div class="flex items-center gap-2.5 overflow-hidden">
+                            <div class="w-2.5 h-8 rounded-full bg-gradient-to-b ${course.color} shrink-0"></div>
+                            <div class="truncate">
+                                <p class="font-bold text-slate-200 group-hover:text-white truncate">${course.code}</p>
+                                <p class="text-[10px] text-slate-400 truncate">${course.name}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">${resourceCount}</span>
+                            <button onclick="event.stopPropagation(); dropCourse('${course.id}')" title="Drop Course" class="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 transition-opacity">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterByCourse(courseId) {
+            state.selectedCourseFilter = courseId;
+            switchTab('feed');
+            renderEnrolledClassesList();
+            renderFeed();
+        }
+
+        function dropCourse(courseId) {
+            const course = COURSES.find(c => c.id === courseId);
+            state.enrolledCourseIds = state.enrolledCourseIds.filter(id => id !== courseId);
+            if (state.selectedCourseFilter === courseId) state.selectedCourseFilter = 'all';
+            renderEnrolledClassesList();
+            renderFeed();
+            showToast(`Dropped ${course ? course.code : 'Course'}. Feed updated.`, 'info');
+        }
+
+        function enrollCourse(courseId) {
+            if (!state.enrolledCourseIds.includes(courseId)) {
+                state.enrolledCourseIds.push(courseId);
+                const course = COURSES.find(c => c.id === courseId);
+                renderEnrolledClassesList();
+                renderFeed();
+                renderEnrollModalCatalog();
+                showToast(`Enrolled in ${course ? course.code : 'Course'}!`, 'success');
+            }
+        }
+
+        // Main Resource Feed Renderer
+        function renderFeed() {
+            const grid = document.getElementById('resource-cards-grid');
+            
+            // Filter logic (Enrollment + Course + Category + Search Query)
+            const filtered = state.resources.filter(res => {
+                if (!state.enrolledCourseIds.includes(res.courseId)) return false;
+                if (state.selectedCourseFilter !== 'all' && res.courseId !== state.selectedCourseFilter) return false;
+                if (state.selectedCategoryFilter !== 'all' && res.category !== state.selectedCategoryFilter) return false;
+                if (state.searchQuery) {
+                    const q = state.searchQuery;
+                    const matchTitle = res.title.toLowerCase().includes(q);
+                    const matchDesc = res.description.toLowerCase().includes(q);
+                    if (!matchTitle && !matchDesc) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-1 md:col-span-2 p-12 text-center bg-slate-900/60 border border-dashed border-slate-800 rounded-2xl flex flex-col items-center justify-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-400 text-xl">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-200">No Materials Found</h3>
+                            <p class="text-xs text-slate-400 max-w-sm mt-1">
+                                ${state.searchQuery ? `No materials matching "${state.searchQuery}".` : "Be the first to share notes or practice problems for this enrolled class!"}
+                            </p>
+                        </div>
+                        <button onclick="openModal('upload-modal')" class="mt-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30">
+                            + Upload First File
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(resource => {
+                const course = COURSES.find(c => c.id === resource.courseId);
+                const isSaved = state.savedResourceIds.includes(resource.id);
+
+                return `
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-slate-700/80 transition-all shadow-sm group">
+                        <div class="flex flex-col gap-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="px-2.5 py-1 rounded-lg bg-indigo-950/80 border border-indigo-800/60 text-indigo-300 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-tag text-indigo-400"></i>
+                                    ${resource.category}
+                                </span>
+                                <span class="text-[11px] text-slate-400 font-mono">${resource.fileType} • ${resource.fileSize}</span>
+                            </div>
+
+                            <h3 onclick="openPreviewModal('${resource.id}')" class="text-base font-bold text-slate-100 group-hover:text-indigo-300 transition-colors cursor-pointer line-clamp-2 leading-snug">
+                                ${resource.title}
+                            </h3>
+
+                            <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                                ${resource.description}
+                            </p>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <div class="px-2 py-0.5 rounded text-[10px] font-bold text-white bg-gradient-to-r ${course ? course.color : 'from-slate-700 to-slate-600'}">
+                                    ${course ? course.code : 'CLASS'}
+                                </div>
+                                <span class="text-[11px] text-slate-400 truncate max-w-[120px]">${resource.uploaderName}</span>
+                            </div>
+
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="openAIModal('${resource.id}')" title="AI Summary & Quiz Generator" class="p-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-400 border border-indigo-800/50 transition-all">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                                </button>
+
+                                <button onclick="toggleSaveResource('${resource.id}')" title="${isSaved ? 'Unbookmark' : 'Save Resource'}" class="p-1.5 rounded-lg border transition-all ${isSaved ? 'bg-amber-950/60 border-amber-800/60 text-amber-400' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'}">
+                                    <i class="${isSaved ? 'fa-solid' : 'fa-regular'} fa-bookmark text-xs"></i>
+                                </button>
+
+                                <button onclick="toggleUpvoteResource('${resource.id}')" class="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${resource.isUpvoted ? 'bg-emerald-950/60 border-emerald-800/60 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'}">
+                                    <i class="fa-solid fa-thumbs-up text-xs"></i>
+                                    <span>${resource.upvotes}</span>
+                                </button>
+
+                                <button onclick="openPreviewModal('${resource.id}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 flex items-center gap-1">
+                                    <i class="fa-regular fa-eye text-xs"></i>
+                                    <span>Preview</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Toggle Upvote
+        function toggleUpvoteResource(resId) {
+            const res = state.resources.find(r => r.id === resId);
+            if (res) {
+                res.isUpvoted = !res.isUpvoted;
+                res.upvotes += res.isUpvoted ? 1 : -1;
+                renderFeed();
+                renderSavedLibrary();
+            }
+        }
+
+        // Toggle Save
+        function toggleSaveResource(resId) {
+            if (state.savedResourceIds.includes(resId)) {
+                state.savedResourceIds = state.savedResourceIds.filter(id => id !== resId);
+                showToast("Removed from Saved Library", "info");
+            } else {
+                state.savedResourceIds.push(resId);
+                showToast("Saved to Library!", "success");
+            }
+            renderFeed();
+            renderSavedLibrary();
+            updateBadges();
+        }
+
+        // Update Nav Count Badges
+        function updateBadges() {
+            const feedCount = state.resources.filter(r => state.enrolledCourseIds.includes(r.courseId)).length;
+            document.getElementById('badge-feed-count').innerText = feedCount;
+            document.getElementById('badge-methods-count').innerText = state.studyMethods.length;
+            document.getElementById('badge-saved-count').innerText = state.savedResourceIds.length;
+        }
+
+        // Study Methods Renderer
+        function renderStudyMethods() {
+            const container = document.getElementById('study-methods-list');
+            const filtered = state.studyMethods.filter(sm => {
+                if (sm.courseId && !state.enrolledCourseIds.includes(sm.courseId)) return false;
+                if (state.searchQuery) {
+                    const q = state.searchQuery;
+                    return sm.title.toLowerCase().includes(q) || sm.content.toLowerCase().includes(q);
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center bg-slate-900/40 rounded-2xl border border-slate-800 text-slate-400 text-xs">No study methods matching query.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(sm => {
+                const course = COURSES.find(c => c.id === sm.courseId);
+                return `
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col gap-3 shadow-sm hover:border-slate-700 transition-all">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="px-2 py-0.5 rounded bg-amber-950/80 border border-amber-800/60 text-amber-300 text-[10px] font-bold uppercase">
+                                        ${sm.methodType}
+                                    </span>
+                                    ${course ? `<span class="text-[11px] font-semibold text-indigo-400">${course.code}</span>` : '<span class="text-[11px] text-slate-400">General Technique</span>'}
+                                </div>
+                                <h3 class="text-base font-bold text-slate-100">${sm.title}</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">By <strong class="text-slate-300">${sm.authorName}</strong> (${sm.authorMajor})</p>
+                            </div>
+
+                            <button onclick="toggleUpvoteMethod('${sm.id}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shrink-0 ${sm.isUpvoted ? 'bg-amber-950/80 border-amber-800/80 text-amber-300' : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'}">
+                                <i class="fa-solid fa-thumbs-up"></i>
+                                <span>${sm.upvotes} Helpful</span>
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-950/60 rounded-xl p-3.5 border border-slate-800/80 text-xs text-slate-300 leading-relaxed whitespace-pre-line font-sans">
+                            ${sm.content}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleUpvoteMethod(mId) {
+            const m = state.studyMethods.find(item => item.id === mId);
+            if (m) {
+                m.isUpvoted = !m.isUpvoted;
+                m.upvotes += m.isUpvoted ? 1 : -1;
+                renderStudyMethods();
+            }
+        }
+
+        // Saved Library Renderer
+        function renderSavedLibrary() {
+            const grid = document.getElementById('saved-cards-grid');
+            const savedList = state.resources.filter(r => state.savedResourceIds.includes(r.id));
+
+            if (savedList.length === 0) {
+                grid.innerHTML = `<div class="col-span-1 md:col-span-2 p-12 text-center bg-slate-900/40 rounded-2xl border border-dashed border-slate-800 text-slate-400 text-xs">Your saved library is empty. Click the bookmark icon on any document card to save it here!</div>`;
+                return;
+            }
+
+            grid.innerHTML = savedList.map(res => {
+                const course = COURSES.find(c => c.id === res.courseId);
+                return `
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-3">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">${res.category}</span>
+                                <span class="text-[10px] font-mono text-slate-500">${res.fileType}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-100 text-sm">${res.title}</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">${res.description}</p>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                            <span class="text-[11px] font-bold text-indigo-400">${course ? course.code : 'CLASS'}</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="toggleSaveResource('${res.id}')" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Remove</button>
+                                <button onclick="openPreviewModal('${res.id}')" class="px-3 py-1 rounded-lg bg-indigo-600 text-white text-xs font-semibold">Open Note</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Modal Visibility Handlers
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById(modalId).classList.add('flex');
+            if (modalId === 'enroll-modal') renderEnrollModalCatalog();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        function populateFormDropdowns() {
+            // Upload form course select
+            const uploadCourseSelect = document.getElementById('upload-course-select');
+            uploadCourseSelect.innerHTML = COURSES.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
+
+            // Upload form category select
+            const uploadCatSelect = document.getElementById('upload-category-select');
+            uploadCatSelect.innerHTML = CATEGORIES.filter(c => c.id !== 'all').map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+
+            // Method form course select
+            const methodCourseSelect = document.getElementById('method-course-select');
+            methodCourseSelect.innerHTML = `<option value="">General (All Classes)</option>` + COURSES.map(c => `<option value="${c.id}">${c.code}</option>`).join('');
+        }
+
+        function renderEnrollModalCatalog() {
+            const inst = INSTITUTIONS.find(i => i.id === state.selectedInstId);
+            document.getElementById('enroll-modal-inst-name').innerText = inst ? inst.name : 'Stanford University';
+
+            const container = document.getElementById('enroll-catalog-list');
+            container.innerHTML = COURSES.map(course => {
+                const isEnrolled = state.enrolledCourseIds.includes(course.id);
+                return `
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-indigo-400">${course.code}</span>
+                                <span class="text-[10px] text-slate-500 font-mono">${course.term}</span>
+                            </div>
+                            <p class="font-medium text-slate-200 mt-0.5">${course.name}</p>
+                            <span class="text-[10px] text-slate-500">${course.count} active students</span>
+                        </div>
+
+                        ${isEnrolled ? `
+                            <button onclick="dropCourse('${course.id}')" class="px-3 py-1.5 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 font-semibold hover:bg-rose-900/80 transition-all shrink-0">
+                                Enrolled (Drop)
+                            </button>
+                        ` : `
+                            <button onclick="enrollCourse('${course.id}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-all shrink-0 flex items-center gap-1">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                                Enroll
+                            </button>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Preview & Annotation System
+        function openPreviewModal(resId) {
+            state.previewResourceId = resId;
+            const res = state.resources.find(r => r.id === resId);
+            if (!res) return;
+
+            document.getElementById('modal-preview-title').innerText = res.title;
+            document.getElementById('modal-preview-meta').innerText = `Uploaded by ${res.uploaderName} (${res.uploaderRole}) • ${res.createdAt}`;
+            document.getElementById('modal-preview-body').innerText = res.contentPreview || res.description;
+            document.getElementById('modal-preview-ai-btn').onclick = () => openAIModal(resId);
+
+            renderPreviewAnnotations(res);
+            openModal('preview-modal');
+        }
+
+        function renderPreviewAnnotations(res) {
+            const list = document.getElementById('preview-annotations-list');
+            document.getElementById('preview-anno-count').innerText = res.annotations ? res.annotations.length : 0;
+
+            if (!res.annotations || res.annotations.length === 0) {
+                list.innerHTML = `<p class="text-[11px] text-slate-500 italic">No annotations added yet.</p>`;
+                return;
+            }
+
+            list.innerHTML = res.annotations.map(a => `
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/80 text-[11px]">
+                    <p class="text-slate-300">${a.text}</p>
+                    <span class="text-[9px] text-indigo-400 font-bold mt-1 block">— ${a.author}</span>
+                </div>
+            `).join('');
+        }
+
+        function submitAnnotation() {
+            const input = document.getElementById('new-annotation-input');
+            const val = input.value.trim();
+            if (!val || !state.previewResourceId) return;
+
+            const res = state.resources.find(r => r.id === state.previewResourceId);
+            if (res) {
+                if (!res.annotations) res.annotations = [];
+                res.annotations.push({
+                    id: 'a-' + Date.now(),
+                    text: val,
+                    author: 'You (Current Student)'
+                });
+                renderPreviewAnnotations(res);
+                input.value = '';
+                showToast("Added inline note!", "success");
+            }
+        }
+
+        function downloadCurrentDocument() {
+            if (!state.previewResourceId) return;
+            const res = state.resources.find(r => r.id === state.previewResourceId);
+            showToast(`Downloading: ${res.title}.${res.fileType.toLowerCase()}`, "info");
+        }
+
+        // Upload Form Submit
+        function handleUploadSubmit(e) {
+            e.preventDefault();
+            const courseId = document.getElementById('upload-course-select').value;
+            const category = document.getElementById('upload-category-select').value;
+            const title = document.getElementById('upload-title').value;
+            const description = document.getElementById('upload-desc').value;
+
+            const newRes = {
+                id: 'res-' + Date.now(),
+                courseId,
+                uploaderName: 'You (Student)',
+                uploaderRole: 'Enrolled Peer',
+                title,
+                description,
+                category,
+                fileType: 'PDF',
+                fileSize: '2.4 MB',
+                createdAt: 'Just now',
+                upvotes: 1,
+                isUpvoted: true,
+                contentPreview: `# ${title}\n\n${description}`,
+                annotations: []
+            };
+
+            state.resources.unshift(newRes);
+            closeModal('upload-modal');
+            document.getElementById('upload-form').reset();
+            renderFeed();
+            updateBadges();
+            showToast(`Resource published to class successfully!`, "success");
+        }
+
+        // Post Method Submit
+        function handleMethodSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('method-title').value;
+            const methodType = document.getElementById('method-type').value;
+            const courseId = document.getElementById('method-course-select').value;
+            const content = document.getElementById('method-content').value;
+
+            const newMethod = {
+                id: 'sm-' + Date.now(),
+                authorName: 'You (Student)',
+                authorMajor: 'Enrolled Major',
+                courseId: courseId || null,
+                title,
+                methodType,
+                content,
+                upvotes: 1,
+                isUpvoted: true,
+                comments: []
+            };
+
+            state.studyMethods.unshift(newMethod);
+            closeModal('new-method-modal');
+            document.getElementById('new-method-form').reset();
+            switchTab('methods');
+            renderStudyMethods();
+            updateBadges();
+            showToast("Learning strategy published!", "success");
+        }
+
+        // AI Assistant Generator Logic
+        function openAIModal(resId) {
+            state.aiResourceId = resId;
+            const res = state.resources.find(r => r.id === resId);
+            if (!res) return;
+
+            document.getElementById('ai-modal-resource-title').innerText = res.title;
+            closeModal('preview-modal');
+            openModal('ai-modal');
+            triggerAIAssistantMode('summary');
+        }
+
+        function triggerAIAssistantMode(mode) {
+            state.aiMode = mode;
+            
+            // Tab highlight
+            ['summary', 'quiz', 'feynman'].forEach(m => {
+                const btn = document.getElementById(`ai-tab-${m}`);
+                if (btn) {
+                    btn.className = m === mode 
+                        ? "flex-1 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white transition-all"
+                        : "flex-1 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-slate-200 transition-all";
+                }
+            });
+
+            const box = document.getElementById('ai-output-box');
+            box.innerText = "Analyzing course material and generating AI study output...";
+
+            setTimeout(() => {
+                const res = state.resources.find(r => r.id === state.aiResourceId);
+                const title = res ? res.title : "Course Note";
+
+                if (mode === 'summary') {
+                    box.innerText = `📌 HIGH-YIELD STUDY SUMMARY: ${title}\n\n• Key Takeaway 1: Focus on core definitions and structural properties emphasized in this document.\n• Key Takeaway 2: Pay attention to step-by-step algorithmic procedures and edge cases.\n• Key Takeaway 3: Memorize time/space complexity trade-offs and primary formula derivations for exams.\n\n💡 Exam Tip: Review the annotations and practice converting abstract formulas into worked examples.`;
+                } else if (mode === 'quiz') {
+                    box.innerText = `📝 PRACTICE QUIZ: ${title}\n\nQuestion 1: What is the primary operational rule discussed in this material?\nA) O(1) constant time\nB) O(log n) logarithmic time\nC) O(n²) quadratic time\n--> Answer: B. (Logarithmic behavior applies to balanced operations or divide-and-conquer strategies).\n\nQuestion 2: Which condition represents a critical edge case when processing these structures?\nA) Null pointer base case\nB) Balanced binary leaf node\nC) Valid matrix dimension\n--> Answer: A. Always verify base case null checks to avoid stack overflows.`;
+                } else {
+                    box.innerText = `💬 FEYNMAN TECHNIQUE EXPLANATION: ${title}\n\nImagine explaining this concept to a friend who has never taken this class:\n\n1. The Big Idea: Instead of memorizing heavy formulas, think of this topic like organizing books on a shelf.\n2. The Mechanism: To find a book quickly, split the shelf in half, ask 'Is my book on the left or right?', and keep halving the search space.\n3. Why It Matters: This drops the work from scanning 1,000 items down to just around 10 steps!`;
+                }
+            }, 400);
+        }
+
+        function copyAIOutput() {
+            const text = document.getElementById('ai-output-box').innerText;
+            navigator.clipboard.writeText(text);
+            showToast("Copied AI study output to clipboard!", "success");
+        }
+    </script>
+</body>
+</html>
