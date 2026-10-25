@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CourseHub - Peer Academic Resource Platform</title>
-    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -29,17 +28,14 @@
             }
         }
     </script>
-    
     <!-- Supabase JS Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <!-- FontAwesome Icons CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
         body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -52,6 +48,8 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        .scrollbar-none { scrollbar-width: none; }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
@@ -64,7 +62,6 @@
 
     <!-- Global Header -->
     <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4">
-        <!-- Brand Logo & Institution Selector -->
         <div class="flex items-center gap-6">
             <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchTab('feed')">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
@@ -79,17 +76,13 @@
                     </span>
                 </div>
             </div>
-
-            <!-- Institution Picker -->
             <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/80 text-xs">
                 <i class="fa-solid fa-building text-indigo-400"></i>
                 <select id="institution-select" onchange="handleInstitutionChange(this.value)" class="bg-transparent text-slate-200 font-medium focus:outline-none cursor-pointer">
-                    <!-- Populated dynamically -->
                 </select>
             </div>
         </div>
 
-        <!-- Global Search Input -->
         <div class="flex-1 max-w-md hidden sm:block">
             <div class="relative">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -106,20 +99,17 @@
             </div>
         </div>
 
-        <!-- Header Actions & Auth Status -->
         <div class="flex items-center gap-3">
             <button onclick="openModal('upload-modal')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all active:scale-95">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
                 <span class="hidden sm:inline">Upload Material</span>
             </button>
 
-            <!-- Dynamic Auth Container -->
             <div id="auth-header-container" class="flex items-center gap-2 border-l border-slate-800 pl-3">
                 <button onclick="openModal('auth-modal')" id="auth-signin-btn" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all">
                     <i class="fa-solid fa-right-to-bracket"></i>
                     <span>Sign In</span>
                 </button>
-
                 <div id="auth-user-badge" class="hidden items-center gap-2">
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-slate-200">
                         <i class="fa-solid fa-user-circle text-indigo-400"></i>
@@ -135,7 +125,6 @@
 
     <!-- Main Layout Workspace -->
     <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 gap-6">
-
         <!-- Sidebar Section -->
         <aside class="w-full md:w-64 shrink-0 flex flex-col gap-6">
             <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-2 flex flex-col gap-1 shadow-sm">
@@ -146,7 +135,6 @@
                     </div>
                     <span id="badge-feed-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800/80 text-slate-300 font-bold">0</span>
                 </button>
-
                 <button id="nav-methods" onclick="switchTab('methods')" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
                     <div class="flex items-center gap-2.5">
                         <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
@@ -154,7 +142,6 @@
                     </div>
                     <span id="badge-methods-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold">0</span>
                 </button>
-
                 <button id="nav-saved" onclick="switchTab('saved')" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
                     <div class="flex items-center gap-2.5">
                         <i class="fa-solid fa-bookmark text-cyan-400"></i>
@@ -162,7 +149,6 @@
                     </div>
                     <span id="badge-saved-count" class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold">0</span>
                 </button>
-
                 <button id="nav-honor" onclick="switchTab('honor')" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
                     <div class="flex items-center gap-2.5">
                         <i class="fa-solid fa-shield-halved text-emerald-400"></i>
@@ -182,16 +168,13 @@
                         + Add Class
                     </button>
                 </div>
-
                 <div id="enrolled-classes-list" class="flex flex-col gap-2">
-                    <!-- Dynamic List of Enrolled Courses -->
                 </div>
             </div>
         </aside>
 
         <!-- Main Content Center Screen -->
         <main class="flex-1 flex flex-col gap-6 min-w-0">
-
             <!-- Banner Header Area -->
             <div class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -208,7 +191,6 @@
                         Enrolled Classes Dashboard
                     </h1>
                 </div>
-
                 <div class="flex items-center gap-2.5">
                     <button onclick="openModal('upload-modal')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-all">
                         <i class="fa-solid fa-plus"></i>
@@ -223,13 +205,11 @@
 
             <!-- Category Filter Bar -->
             <div id="category-filter-bar" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                <!-- Dynamically populated category buttons -->
             </div>
 
             <!-- TAB CONTAINER 1: Resource Cards Feed -->
             <div id="tab-feed" class="flex flex-col gap-4">
                 <div id="resource-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Dynamically populated resource cards -->
                 </div>
             </div>
 
@@ -249,9 +229,7 @@
                         + Post Strategy
                     </button>
                 </div>
-
                 <div id="study-methods-list" class="flex flex-col gap-4">
-                    <!-- Dynamically populated study methods -->
                 </div>
             </div>
 
@@ -263,9 +241,7 @@
                         Bookmarked Resources & Exam Prep
                     </h2>
                 </div>
-
                 <div id="saved-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Dynamically populated saved cards -->
                 </div>
             </div>
 
@@ -280,20 +256,17 @@
                         <p class="text-xs text-slate-400">Standard honor policy for peer educational material sharing</p>
                     </div>
                 </div>
-                
                 <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
                     <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
                         <h3 class="font-bold text-emerald-400 mb-1"><i class="fa-solid fa-check-circle mr-1.5"></i> Encouraged Shared Materials</h3>
                         <p class="text-slate-400">Student-authored lecture notes, original practice problem sets, conceptual summaries, flashcard exports, and study routines.</p>
                     </div>
-
                     <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
                         <h3 class="font-bold text-rose-400 mb-1"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Prohibited Content</h3>
                         <p class="text-slate-400">Active exam solutions, graded homework answers without permission, copyrighted textbook scans, or any materials explicitly restricted by instructors.</p>
                     </div>
                 </div>
             </div>
-
         </main>
     </div>
 
@@ -303,7 +276,6 @@
             <button onclick="closeModal('auth-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
-
             <div class="flex flex-col gap-1">
                 <div class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-400 text-lg mb-2">
                     <i class="fa-solid fa-user-lock"></i>
@@ -311,27 +283,20 @@
                 <h2 id="auth-modal-title" class="text-lg font-bold text-white">Sign In to CourseHub</h2>
                 <p class="text-xs text-slate-400">Access your class materials and peer study groups</p>
             </div>
-
-            <!-- Form Mode Tabs -->
             <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
                 <button id="auth-tab-signin" onclick="switchAuthMode('signin')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 text-white transition-all">Sign In</button>
                 <button id="auth-tab-signup" onclick="switchAuthMode('signup')" class="flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all">Create Account</button>
             </div>
-
-            <!-- Auth Error / Status Feedback Box -->
             <div id="auth-status-box" class="hidden p-3 rounded-xl border text-xs font-medium"></div>
-
             <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="flex flex-col gap-4 text-xs">
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Email Address *</label>
                     <input type="email" id="auth-email" required placeholder="student@university.edu" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500">
                 </div>
-
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Password *</label>
                     <input type="password" id="auth-password" required placeholder="••••••••" minlength="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none focus:border-indigo-500">
                 </div>
-
                 <button type="submit" id="auth-submit-btn" class="mt-2 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
                     <span>Sign In</span>
                     <i class="fa-solid fa-arrow-right"></i>
@@ -353,17 +318,14 @@
                         <p id="modal-preview-meta" class="text-[11px] text-slate-400">Uploaded by Student</p>
                     </div>
                 </div>
-
                 <div class="flex items-center gap-2">
                     <button onclick="closeModal('preview-modal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
             </div>
-
             <div class="flex-1 overflow-y-auto p-6 bg-slate-950/40">
                 <div id="modal-preview-body" class="bg-slate-900 rounded-xl border border-slate-800 p-5 text-xs text-slate-300 font-mono leading-relaxed whitespace-pre-wrap select-text">
-                    <!-- Text content -->
                 </div>
             </div>
         </div>
@@ -381,30 +343,25 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-
             <form id="upload-form" onsubmit="handleUploadSubmit(event)" class="flex flex-col gap-4 text-xs">
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Target Class *</label>
                     <select id="upload-course-select" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
                     </select>
                 </div>
-
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Category *</label>
                     <select id="upload-category-select" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
                     </select>
                 </div>
-
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Title *</label>
                     <input type="text" id="upload-title" required placeholder="e.g., Midterm 1 Binary Trees Cheat Sheet" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500">
                 </div>
-
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Description / Notes *</label>
                     <textarea id="upload-desc" required rows="3" placeholder="Key topics covered..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
                 </div>
-
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button type="button" onclick="closeModal('upload-modal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs">
                         Cancel
@@ -429,18 +386,15 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-
             <form id="method-form" onsubmit="handleMethodSubmit(event)" class="flex flex-col gap-4 text-xs">
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Strategy Title *</label>
                     <input type="text" id="method-title" required placeholder="e.g., 25-5 Pomodoro with Blurting Technique" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500">
                 </div>
-
                 <div>
                     <label class="block font-bold text-slate-300 mb-1">Detailed Explanation & Steps *</label>
                     <textarea id="method-body" required rows="4" placeholder="Describe the workflow step-by-step..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-amber-500 resize-none"></textarea>
                 </div>
-
                 <div class="flex items-center justify-end gap-2 pt-2">
                     <button type="button" onclick="closeModal('new-method-modal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs">
                         Cancel
@@ -465,9 +419,7 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-
             <div id="enroll-catalog-list" class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
-                <!-- Populated dynamically -->
             </div>
         </div>
     </div>
@@ -480,7 +432,7 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentAuthMode = 'signin'; // 'signin' or 'signup'
+        let currentAuthMode = 'signin';
         let currentUser = null;
 
         // Static Mock Data Definitions
@@ -592,455 +544,4 @@
                 userBadge.classList.add('flex');
                 emailDisplay.innerText = user.email;
             } else {
-                signinBtn.classList.remove('hidden');
-                userBadge.classList.add('hidden');
-                userBadge.classList.remove('flex');
-            }
-        }
-
-        function switchAuthMode(mode) {
-            currentAuthMode = mode;
-            const title = document.getElementById('auth-modal-title');
-            const submitBtn = document.getElementById('auth-submit-btn');
-            const tabSignin = document.getElementById('auth-tab-signin');
-            const tabSignup = document.getElementById('auth-tab-signup');
-            const statusBox = document.getElementById('auth-status-box');
-
-            statusBox.classList.add('hidden');
-
-            if (mode === 'signin') {
-                title.innerText = 'Sign In to CourseHub';
-                submitBtn.innerHTML = `<span>Sign In</span><i class="fa-solid fa-arrow-right"></i>`;
-                tabSignin.className = "flex-1 py-1.5 rounded-lg bg-indigo-600 text-white transition-all";
-                tabSignup.className = "flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all";
-            } else {
-                title.innerText = 'Create your CourseHub Account';
-                submitBtn.innerHTML = `<span>Sign Up</span><i class="fa-solid fa-user-plus"></i>`;
-                tabSignup.className = "flex-1 py-1.5 rounded-lg bg-indigo-600 text-white transition-all";
-                tabSignin.className = "flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-all";
-            }
-        }
-
-        async function handleAuthSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const statusBox = document.getElementById('auth-status-box');
-
-            statusBox.className = "p-3 rounded-xl border text-xs font-medium bg-slate-950 text-indigo-300 border-indigo-800/80";
-            statusBox.innerText = "Processing request...";
-            statusBox.classList.remove('hidden');
-
-            try {
-                if (currentAuthMode === 'signin') {
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    
-                    showToast("Successfully signed in!", "success");
-                    closeModal('auth-modal');
-                } else {
-                    const { data, error } = await supabase.auth.signUp({ email, password });
-                    if (error) throw error;
-
-                    statusBox.className = "p-3 rounded-xl border text-xs font-medium bg-emerald-950/80 text-emerald-300 border-emerald-800/80";
-                    if (data?.session) {
-                        showToast("Account created successfully!", "success");
-                        closeModal('auth-modal');
-                    } else {
-                        statusBox.innerText = "Registration successful! Please check your email to confirm your account.";
-                    }
-                }
-            } catch (err) {
-                statusBox.className = "p-3 rounded-xl border text-xs font-medium bg-rose-950/80 text-rose-300 border-rose-800/80";
-                statusBox.innerText = err.message || "An authentication error occurred.";
-            }
-        }
-
-        async function handleSignOut() {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-                showToast(error.message, "info");
-            } else {
-                showToast("Signed out successfully", "info");
-            }
-        }
-
-        // --- 3. Platform UI Handlers ---
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-message');
-            const toastIcon = document.getElementById('toast-icon');
-
-            toastMsg.innerText = message;
-            if (type === 'success') {
-                toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
-                toast.className = "fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border bg-emerald-950/90 text-emerald-200 border-emerald-500/50 transition-all duration-300";
-            } else {
-                toastIcon.className = "fa-solid fa-circle-info text-indigo-400";
-                toast.className = "fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border bg-indigo-950/90 text-indigo-200 border-indigo-500/50 transition-all duration-300";
-            }
-
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3500);
-        }
-
-        function initInstitutionDropdown() {
-            const select = document.getElementById('institution-select');
-            select.innerHTML = INSTITUTIONS.map(inst => `<option value="${inst.id}">${inst.name}</option>`).join('');
-        }
-
-        function handleInstitutionChange(instId) {
-            state.selectedInstId = instId;
-            const inst = INSTITUTIONS.find(i => i.id === instId);
-            document.getElementById('current-inst-label').innerText = inst.name;
-            renderEnrollCatalog();
-        }
-
-        function handleSearchInput(val) {
-            state.searchQuery = val.trim().toLowerCase();
-            const clearBtn = document.getElementById('clear-search-btn');
-            if (state.searchQuery) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-            }
-            renderFeed();
-            renderStudyMethods();
-        }
-
-        function clearSearch() {
-            document.getElementById('search-input').value = '';
-            handleSearchInput('');
-        }
-
-        function switchTab(tabName) {
-            state.activeTab = tabName;
-            ['feed', 'methods', 'saved', 'honor'].forEach(t => {
-                document.getElementById(`tab-${t}`)?.classList.add('hidden');
-                const btn = document.getElementById(`nav-${t}`);
-                if (btn) {
-                    btn.className = "flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60";
-                }
-            });
-            document.getElementById(`tab-${tabName}`)?.classList.remove('hidden');
-            const activeBtn = document.getElementById(`nav-${tabName}`);
-            if (activeBtn) {
-                activeBtn.className = "flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all bg-indigo-600 text-white shadow-md";
-            }
-        }
-
-        function renderCategoryFilters() {
-            const bar = document.getElementById('category-filter-bar');
-            bar.innerHTML = CATEGORIES.map(cat => `
-                <button onclick="selectCategoryFilter('${cat.id}')" class="px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
-                    state.selectedCategoryFilter === cat.id 
-                        ? 'bg-indigo-600/90 text-white border border-indigo-500 shadow-md' 
-                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
-                }">
-                    <i class="fa-solid ${cat.icon}"></i>
-                    <span>${cat.label}</span>
-                </button>
-            `).join('');
-        }
-
-        function selectCategoryFilter(catId) {
-            state.selectedCategoryFilter = catId;
-            renderCategoryFilters();
-            renderFeed();
-        }
-
-        function renderEnrolledClassesList() {
-            const container = document.getElementById('enrolled-classes-list');
-            const enrolled = COURSES.filter(c => state.enrolledCourseIds.includes(c.id));
-            document.getElementById('enrolled-count-header').innerText = enrolled.length;
-
-            if (enrolled.length === 0) {
-                container.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2">No active classes. Click "+ Add Class" to enroll.</p>`;
-                return;
-            }
-
-            container.innerHTML = enrolled.map(course => `
-                <div class="flex items-center justify-between p-2.5 rounded-xl border bg-slate-950/50 border-slate-800 text-xs">
-                    <div>
-                        <span class="font-bold text-slate-200 block">${course.code}</span>
-                        <span class="text-[10px] text-slate-400 truncate max-w-[140px] block">${course.name}</span>
-                    </div>
-                    <button onclick="unenrollCourse('${course.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1" title="Unenroll">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function renderFeed() {
-            const grid = document.getElementById('resource-cards-grid');
-            let filtered = state.resources.filter(res => state.enrolledCourseIds.includes(res.courseId));
-
-            if (state.selectedCategoryFilter !== 'all') {
-                filtered = filtered.filter(res => res.category === state.selectedCategoryFilter);
-            }
-
-            if (state.searchQuery) {
-                filtered = filtered.filter(res => 
-                    res.title.toLowerCase().includes(state.searchQuery) ||
-                    res.description.toLowerCase().includes(state.searchQuery)
-                );
-            }
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 text-xs">No matching resources found for your active enrolled classes.</div>`;
-                return;
-            }
-
-            grid.innerHTML = filtered.map(resource => {
-                const isSaved = state.savedResourceIds.includes(resource.id);
-                const course = COURSES.find(c => c.id === resource.courseId) || { code: 'COURSE' };
-                
-                return `
-                    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-slate-700 transition-all shadow-sm">
-                        <div class="flex flex-col gap-2">
-                            <div class="flex items-center justify-between">
-                                <span class="px-2.5 py-1 rounded-lg bg-indigo-950 border border-indigo-800 text-indigo-300 text-[10px] font-bold uppercase">${course.code} • ${resource.category}</span>
-                                <button onclick="toggleSaveResource('${resource.id}')" class="text-xs ${isSaved ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'}">
-                                    <i class="fa-${isSaved ? 'solid' : 'regular'} fa-bookmark"></i>
-                                </button>
-                            </div>
-                            <h3 class="text-base font-bold text-slate-100 mt-1">${resource.title}</h3>
-                            <p class="text-xs text-slate-400 leading-relaxed">${resource.description}</p>
-                        </div>
-                        
-                        <div class="flex items-center justify-between pt-3 border-t border-slate-800/80 text-xs">
-                            <div class="flex items-center gap-3">
-                                <button onclick="upvoteResource('${resource.id}')" class="flex items-center gap-1.5 text-slate-400 hover:text-indigo-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                                    <i class="fa-solid fa-thumbs-up text-indigo-400"></i>
-                                    <span class="font-bold text-slate-200">${resource.upvotes}</span>
-                                </button>
-                                <span class="text-[11px] text-slate-500">By ${resource.uploaderName}</span>
-                            </div>
-                            <button onclick="openPreviewModal('${resource.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all">
-                                Preview
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderStudyMethods() {
-            const list = document.getElementById('study-methods-list');
-            let filtered = state.studyMethods;
-
-            if (state.searchQuery) {
-                filtered = filtered.filter(m => 
-                    m.title.toLowerCase().includes(state.searchQuery) ||
-                    m.description.toLowerCase().includes(state.searchQuery)
-                );
-            }
-
-            if (filtered.length === 0) {
-                list.innerHTML = `<div class="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 text-xs">No study methods posted yet. Click "+ Post Strategy" above!</div>`;
-                return;
-            }
-
-            list.innerHTML = filtered.map(m => `
-                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col gap-3">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-lightbulb text-amber-400"></i>
-                            ${m.title}
-                        </h3>
-                        <span class="text-[11px] text-slate-500">Posted by ${m.author}</span>
-                    </div>
-                    <p class="text-xs text-slate-300 leading-relaxed">${m.description}</p>
-                </div>
-            `).join('');
-        }
-
-        function renderSavedLibrary() {
-            const grid = document.getElementById('saved-cards-grid');
-            const savedList = state.resources.filter(r => state.savedResourceIds.includes(r.id));
-
-            if (savedList.length === 0) {
-                grid.innerHTML = `<div class="col-span-full p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 text-xs">No saved materials in your library yet.</div>`;
-                return;
-            }
-
-            grid.innerHTML = savedList.map(resource => `
-                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4">
-                    <div>
-                        <span class="px-2.5 py-1 rounded-lg bg-cyan-950 border border-cyan-800 text-cyan-300 text-[10px] font-bold uppercase">${resource.category}</span>
-                        <h3 class="text-base font-bold text-slate-100 mt-2">${resource.title}</h3>
-                        <p class="text-xs text-slate-400 mt-1">${resource.description}</p>
-                    </div>
-                    <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
-                        <button onclick="toggleSaveResource('${resource.id}')" class="text-xs text-rose-400 hover:text-rose-300">
-                            <i class="fa-solid fa-trash-can mr-1"></i> Remove
-                        </button>
-                        <button onclick="openPreviewModal('${resource.id}')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold">Preview</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderEnrollCatalog() {
-            const list = document.getElementById('enroll-catalog-list');
-            const instCourses = COURSES.filter(c => c.institutionId === state.selectedInstId);
-
-            list.innerHTML = instCourses.map(course => {
-                const isEnrolled = state.enrolledCourseIds.includes(course.id);
-                return `
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-                        <div>
-                            <span class="font-bold text-xs text-white">${course.code}</span>
-                            <p class="text-[11px] text-slate-400">${course.name}</p>
-                        </div>
-                        <button onclick="toggleEnrollCourse('${course.id}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold ${
-                            isEnrolled 
-                                ? 'bg-slate-800 text-slate-300 border border-slate-700' 
-                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
-                        }">
-                            ${isEnrolled ? 'Enrolled' : '+ Enroll'}
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleEnrollCourse(courseId) {
-            if (state.enrolledCourseIds.includes(courseId)) {
-                state.enrolledCourseIds = state.enrolledCourseIds.filter(id => id !== courseId);
-                showToast("Unenrolled from class", "info");
-            } else {
-                state.enrolledCourseIds.push(courseId);
-                showToast("Enrolled in class!", "success");
-            }
-            renderEnrolledClassesList();
-            renderEnrollCatalog();
-            renderFeed();
-        }
-
-        function unenrollCourse(courseId) {
-            state.enrolledCourseIds = state.enrolledCourseIds.filter(id => id !== courseId);
-            showToast("Unenrolled from class", "info");
-            renderEnrolledClassesList();
-            renderEnrollCatalog();
-            renderFeed();
-        }
-
-        function toggleSaveResource(resId) {
-            if (state.savedResourceIds.includes(resId)) {
-                state.savedResourceIds = state.savedResourceIds.filter(id => id !== resId);
-                showToast("Removed from saved library", "info");
-            } else {
-                state.savedResourceIds.push(resId);
-                showToast("Added to saved library!", "success");
-            }
-            updateBadges();
-            renderFeed();
-            renderSavedLibrary();
-        }
-
-        function upvoteResource(resId) {
-            const res = state.resources.find(r => r.id === resId);
-            if (res) {
-                res.upvotes += 1;
-                renderFeed();
-            }
-        }
-
-        function updateBadges() {
-            document.getElementById('badge-feed-count').innerText = state.resources.length;
-            document.getElementById('badge-methods-count').innerText = state.studyMethods.length;
-            document.getElementById('badge-saved-count').innerText = state.savedResourceIds.length;
-        }
-
-        function openModal(modalId) {
-            document.getElementById(modalId)?.classList.remove('hidden');
-            document.getElementById(modalId)?.classList.add('flex');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId)?.classList.add('hidden');
-            document.getElementById(modalId)?.classList.remove('flex');
-        }
-
-        function populateFormDropdowns() {
-            const uploadCourseSelect = document.getElementById('upload-course-select');
-            uploadCourseSelect.innerHTML = COURSES.map(c => `<option value="${c.id}">${c.code} — ${c.name}</option>`).join('');
-
-            const uploadCatSelect = document.getElementById('upload-category-select');
-            uploadCatSelect.innerHTML = CATEGORIES.filter(c => c.id !== 'all').map(c => `<option value="${c.id}">${c.label}</option>`).join('');
-        }
-
-        function openPreviewModal(resId) {
-            const res = state.resources.find(r => r.id === resId);
-            if (!res) return;
-            document.getElementById('modal-preview-title').innerText = res.title;
-            document.getElementById('modal-preview-meta').innerText = `Uploaded by ${res.uploaderName} • ${res.category}`;
-            document.getElementById('modal-preview-body').innerText = res.contentPreview || res.description;
-            openModal('preview-modal');
-        }
-
-        function handleUploadSubmit(e) {
-            e.preventDefault();
-            if (!currentUser) {
-                showToast("Please sign in first to upload resources!", "info");
-                openModal('auth-modal');
-                return;
-            }
-
-            const courseId = document.getElementById('upload-course-select').value;
-            const category = document.getElementById('upload-category-select').value;
-            const title = document.getElementById('upload-title').value.trim();
-            const description = document.getElementById('upload-desc').value.trim();
-
-            state.resources.unshift({
-                id: 'res-' + Date.now(),
-                courseId,
-                uploaderName: currentUser.email.split('@')[0],
-                title,
-                description,
-                category,
-                fileType: 'PDF',
-                fileSize: '1.2 MB',
-                createdAt: 'Just now',
-                upvotes: 0,
-                contentPreview: `# ${title}\n\n${description}`
-            });
-
-            document.getElementById('upload-form').reset();
-            closeModal('upload-modal');
-            showToast("Material uploaded successfully!", "success");
-            updateBadges();
-            renderFeed();
-        }
-
-        function handleMethodSubmit(e) {
-            e.preventDefault();
-            if (!currentUser) {
-                showToast("Please sign in first to post study methods!", "info");
-                openModal('auth-modal');
-                return;
-            }
-
-            const title = document.getElementById('method-title').value.trim();
-            const description = document.getElementById('method-body').value.trim();
-
-            state.studyMethods.unshift({
-                id: 'method-' + Date.now(),
-                author: currentUser.email.split('@')[0],
-                title,
-                description,
-                upvotes: 0,
-                createdAt: 'Just now'
-            });
-
-            document.getElementById('method-form').reset();
-            closeModal('new-method-modal');
-            showToast("Study method posted!", "success");
-            updateBadges();
-            renderStudyMethods();
-        }
-    </script>
-</body>
-</html>
+                signinBtn
