@@ -1,0 +1,63 @@
+-- 1. User Profiles (Keeps track of usernames and dark mode)
+create table profiles (
+  id uuid references auth.users on delete cascade primary key,
+  username text unique not null,
+  theme_preference text default 'light'
+);
+
+-- 2. Recipes (The main content)
+create table recipes (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references profiles(id) on delete cascade not null,
+  title text not null,
+  instructions text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 3. Roles (Security! We keep these separate so people can't make themselves Admin)
+create table moderators ( user_id uuid references profiles(id) on delete cascade primary key );
+create table admins ( user_id uuid references profiles(id) on delete cascade primary key );
+
+-- 4. Moderation (Reports and Hiding)
+create table reports (
+  id uuid default gen_random_uuid() primary key,
+  reporter_id uuid references profiles(id) on delete cascade not null,
+  recipe_id uuid references recipes(id) on delete cascade not null,
+  reason text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create table hidden_recipes (
+  recipe_id uuid references recipes(id) on delete cascade primary key,
+  moderator_id uuid references profiles(id) not null,
+  hidden_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 5. Security: Enable Row Level Security (This is the "Lock")
+alter table profiles enable row level security;
+alter table recipes enable row level security;
+alter table reports enable row level security;
+alter table hidden_recipes enable row level security;
+
+-- Profiles: Everyone can see them, but you can only edit your own.
+create policy "Public profiles are viewable by everyone." on profiles for select using (true);
+create policy "Users can update own profile." on profiles for update using (auth.uid() = id);
+
+-- Recipes: Everyone can see them UNLESS they are hidden. You can only edit/delete your own.
+create policy "Recipes are viewable if not hidden." on recipes for select using (
+  id not in (select recipe_id from hidden_recipes)
+);
+create policy "Users can insert own recipes." on recipes for insert with check (auth.uid() = user_id);
+create policy "Users can update own recipes." on recipes for update using (auth.uid() = user_id);
+create policy "Users can delete own recipes." on recipes for delete using (auth.uid() = user_id);
+
+-- Reports: Anyone can make a report, only Mods/Admins can read them.
+create policy "Users can create reports." on reports for insert with check (auth.uid() = reporter_id);
+create policy "Mods and Admins can read reports." on reports for select using (
+  auth.uid() in (select user_id from moderators) or auth.uid() in (select user_id from admins)
+);
+
+-- Hiding: Only Mods/Admins can hide a recipe.
+create policy "Mods can hide recipes." on hidden_recipes for insert with check (
+  auth.uid() in (select user_id from moderators) or auth.uid() in (select user_id from admins)
+);

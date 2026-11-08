@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple File Sharer</title>
+    <!-- We are using Tailwind CSS via a CDN link so we don't need to install anything -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- This is the Supabase library. It loads directly into the browser. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-8">
+
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-center">📁 Simple File Sharer</h1>
+
+        <!-- ========================================== -->
+        <!-- SECTION 1: LOGIN / SIGNUP                  -->
+        <!-- ========================================== -->
+        <div id="auth-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4">Sign In or Sign Up</h2>
+            
+            <form id="auth-form" class="flex flex-col gap-3">
+                <input type="email" id="email" placeholder="Email" required class="border p-2 rounded">
+                <input type="password" id="password" placeholder="Password (min 8 chars)" required class="border p-2 rounded">
+                
+                <div class="flex gap-2">
+                    <button type="button" onclick="login()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Sign In</button>
+                    <button type="button" onclick="signup()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">Sign Up</button>
+                </div>
+            </form>
+            
+            <p id="auth-message" class="text-red-500 text-sm mt-3 text-center"></p>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SECTION 2: FILE UPLOAD (Hidden until login)-->
+        <!-- ========================================== -->
+        <div id="upload-section" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Upload a File</h2>
+                <button onclick="logout()" class="text-sm text-red-500 hover:underline">Log Out</button>
+            </div>
+            
+            <input type="file" id="fileInput" class="mb-3 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+            <button onclick="uploadFile()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload File</button>
+            <p id="upload-message" class="text-sm mt-2"></p>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SECTION 3: FILE LIST (Hidden until login)  -->
+        <!-- ========================================== -->
+        <div id="files-section" class="bg-white p-6 rounded-lg shadow-md hidden">
+            <h2 class="text-xl font-semibold mb-4">Your Files</h2>
+            <ul id="file-list" class="flex flex-col gap-2">
+                <!-- Files will be injected here by JavaScript -->
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIC                           -->
+    <!-- ========================================== -->
+    <script>
+        // 1. YOUR SUPABASE CONNECTION
+        // Replace these with your actual Supabase URL and Anon Key
+        const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+
+        // Initialize Supabase
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 2. AUTHENTICATION (LOGIN / SIGNUP / LOGOUT)
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageEl = document.getElementById('auth-message');
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                messageEl.textContent = error.message;
+            } else {
+                messageEl.textContent = '';
+                checkUser(); // Update the screen
+            }
+        }
+
+        async function signup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageEl = document.getElementById('auth-message');
+
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+
+            if (error) {
+                messageEl.textContent = error.message;
+            } else {
+                messageEl.textContent = 'Success! Check your email to confirm.';
+                messageEl.classList.replace('text-red-500', 'text-green-500');
+            }
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            checkUser(); // Update the screen
+        }
+
+        // 3. FILE UPLOADING
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const messageEl = document.getElementById('upload-message');
+
+            if (!file) {
+                messageEl.textContent = 'Please select a file first.';
+                return;
+            }
+
+            // Get current user
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            // Upload to Supabase Storage bucket named 'files'
+            // We add the timestamp to the filename so files don't overwrite each other
+            const filePath = `${user.id}/${Date.now()}_${file.name}`;
+            
+            const { data, error } = await supabaseClient.storage
+                .from('files')
+                .upload(filePath, file);
+
+            if (error) {
+                messageEl.textContent = 'Error: ' + error.message;
+                messageEl.className = 'text-red-500 text-sm mt-2';
+            } else {
+                // Save the file record to the database table 'shared_files'
+                await supabaseClient.from('shared_files').insert({
+                    user_id: user.id,
+                    file_name: file.name,
+                    file_path: filePath
+                });
+
+                messageEl.textContent = 'File uploaded successfully!';
+                messageEl.className = 'text-green-500 text-sm mt-2';
+                fileInput.value = ''; // Clear input
+                loadFiles(); // Refresh the list
+            }
+        }
+
+        // 4. DISPLAYING FILES
+        async function loadFiles() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) return;
+
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = '<li class="text-gray-400">Loading...</li>';
+
+            // Fetch files belonging to the current user
+            const { data, error } = await supabaseClient
+                .from('shared_files')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                fileList.innerHTML = `<li class="text-red-500">Error loading files: ${error.message}</li>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                fileList.innerHTML = '<li class="text-gray-400">You haven\'t uploaded any files yet.</li>';
+                return;
+            }
+
+            fileList.innerHTML = ''; // Clear loading text
+
+            data.forEach(fileRecord => {
+                // Get the public URL for the file
+                const { data: urlData } = supabaseClient.storage
+                    .from('files')
+                    .getPublicUrl(fileRecord.file_path);
+
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center border-b pb-2';
+                li.innerHTML = `
+                    <a href="${urlData.publicUrl}" target="_blank" class="text-blue-600 hover:underline truncate w-2/3">${fileRecord.file_name}</a>
+                    <button onclick="deleteFile('${fileRecord.id}', '${fileRecord.file_path}')" class="text-red-500 text-sm hover:underline">Delete</button>
+                `;
+                fileList.appendChild(li);
+            });
+        }
+
+        // 5. DELETING FILES
+        async function deleteFile(id, path) {
+            if (!confirm('Are you sure you want to delete this file?')) return;
+
+            // 1. Delete from Storage
+            await supabaseClient.storage.from('files').remove([path]);
+            
+            // 2. Delete from Database
+            await supabaseClient.from('shared_files').delete().eq('id', id);
+
+            loadFiles(); // Refresh list
+        }
+
+        // 6. CHECK LOGIN STATE ON PAGE LOAD
+        async function checkUser() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            const authSection = document.getElementById('auth-section');
+            const uploadSection = document.getElementById('upload-section');
+            const filesSection = document.getElementById('files-section');
+
+            if (user) {
+                // User is logged in
+                authSection.classList.add('hidden');
+                uploadSection.classList.remove('hidden');
+                filesSection.classList.remove('hidden');
+                loadFiles();
+            } else {
+                // User is logged out
+                authSection.classList.remove('hidden');
+                uploadSection.classList.add('hidden');
+                filesSection.classList.add('hidden');
+            }
+        }
+
+        // Listen for auth changes (e.g. clicking the confirmation link in email)
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            checkUser();
+        });
+
+        // Run on page load
+        checkUser();
+    </script>
+</body>
+</html>
