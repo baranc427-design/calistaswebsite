@@ -1,238 +1,574 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple File Sharer</title>
-    <!-- We are using Tailwind CSS via a CDN link so we don't need to install anything -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- This is the Supabase library. It loads directly into the browser. -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cooking Helper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans p-8">
+<body class="bg-gray-100 text-gray-800 font-sans p-6">
+  <div class="max-w-3xl mx-auto">
 
-    <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold mb-6 text-center">📁 Simple File Sharer</h1>
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">🍳 Cooking Helper</h1>
+      <div id="user-badge" class="text-sm text-gray-500 hidden"></div>
+    </header>
 
-        <!-- ========================================== -->
-        <!-- SECTION 1: LOGIN / SIGNUP                  -->
-        <!-- ========================================== -->
-        <div id="auth-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-xl font-semibold mb-4">Sign In or Sign Up</h2>
-            
-            <form id="auth-form" class="flex flex-col gap-3">
-                <input type="email" id="email" placeholder="Email" required class="border p-2 rounded">
-                <input type="password" id="password" placeholder="Password (min 8 chars)" required class="border p-2 rounded">
-                
-                <div class="flex gap-2">
-                    <button type="button" onclick="login()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">Sign In</button>
-                    <button type="button" onclick="signup()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">Sign Up</button>
-                </div>
-            </form>
-            
-            <p id="auth-message" class="text-red-500 text-sm mt-3 text-center"></p>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- SECTION 2: FILE UPLOAD (Hidden until login)-->
-        <!-- ========================================== -->
-        <div id="upload-section" class="bg-white p-6 rounded-lg shadow-md mb-6 hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold">Upload a File</h2>
-                <button onclick="logout()" class="text-sm text-red-500 hover:underline">Log Out</button>
-            </div>
-            
-            <input type="file" id="fileInput" class="mb-3 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-            <button onclick="uploadFile()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload File</button>
-            <p id="upload-message" class="text-sm mt-2"></p>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- SECTION 3: FILE LIST (Hidden until login)  -->
-        <!-- ========================================== -->
-        <div id="files-section" class="bg-white p-6 rounded-lg shadow-md hidden">
-            <h2 class="text-xl font-semibold mb-4">Your Files</h2>
-            <ul id="file-list" class="flex flex-col gap-2">
-                <!-- Files will be injected here by JavaScript -->
-            </ul>
-        </div>
-
+    <!-- BANNED BANNER -->
+    <div id="banned-banner" class="hidden bg-red-100 text-red-800 p-3 rounded mb-4 text-sm">
+      Your account has been banned. You cannot upload or report posts.
     </div>
 
-    <!-- ========================================== -->
-    <!-- JAVASCRIPT LOGIC                           -->
-    <!-- ========================================== -->
-    <script>
-        // 1. YOUR SUPABASE CONNECTION
-        // Replace these with your actual Supabase URL and Anon Key
-        const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';
-        const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+    <!-- AUTH -->
+    <section id="auth-section" class="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">Sign In or Sign Up</h2>
+      <form id="auth-form" class="flex flex-col gap-3" onsubmit="return false;">
+        <input id="email" type="email" placeholder="Email" required class="border p-2 rounded" />
+        <input id="password" type="password" placeholder="Password (min 8 chars)" required class="border p-2 rounded" />
+        <div class="flex gap-2">
+          <button type="button" onclick="login()" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Sign In</button>
+          <button type="button" onclick="signup()" class="bg-green-600 text-white px-4 py-2 rounded w-full">Sign Up</button>
+        </div>
+      </form>
+      <p id="auth-message" class="text-sm mt-3 text-center"></p>
+    </section>
 
-        // Initialize Supabase
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <!-- UPLOAD -->
+    <section id="upload-section" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Upload a File</h2>
+        <button onclick="logout()" class="text-sm text-red-500 hover:underline">Log Out</button>
+      </div>
+      <input id="fileInput" type="file" class="mb-3 block w-full text-sm" />
+      <button onclick="uploadFile()" class="bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
+      <p id="upload-message" class="text-sm mt-2"></p>
+      <div class="mt-4 pt-4 border-t">
+        <button onclick="deleteMyData()" class="text-xs text-red-600 hover:underline">Delete my account data</button>
+      </div>
+    </section>
 
-        // 2. AUTHENTICATION (LOGIN / SIGNUP / LOGOUT)
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const messageEl = document.getElementById('auth-message');
+    <!-- MY FILES -->
+    <section id="files-section" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+      <h2 class="text-xl font-semibold mb-4">My Files</h2>
+      <ul id="file-list" class="flex flex-col gap-2"></ul>
+    </section>
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    <!-- MY REPORTS -->
+    <section id="my-reports-section" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+      <h2 class="text-xl font-semibold mb-4">My Reports</h2>
+      <ul id="my-reports-list" class="flex flex-col gap-2 text-sm"></ul>
+    </section>
 
-            if (error) {
-                messageEl.textContent = error.message;
-            } else {
-                messageEl.textContent = '';
-                checkUser(); // Update the screen
-            }
-        }
+    <!-- MODERATION PANEL -->
+    <section id="mod-panel" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">Moderation</h2>
+        <span id="mod-role" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded"></span>
+      </div>
 
-        async function signup() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const messageEl = document.getElementById('auth-message');
+      <h3 class="font-semibold mt-2 mb-2">Open Reports</h3>
+      <ul id="reports-list" class="flex flex-col gap-2 text-sm"></ul>
 
-            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      <h3 class="font-semibold mt-6 mb-2">All Files</h3>
+      <ul id="all-files-list" class="flex flex-col gap-2 text-sm"></ul>
+    </section>
 
-            if (error) {
-                messageEl.textContent = error.message;
-            } else {
-                messageEl.textContent = 'Success! Check your email to confirm.';
-                messageEl.classList.replace('text-red-500', 'text-green-500');
-            }
-        }
+    <!-- ADMIN PANEL -->
+    <section id="admin-panel" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+      <h2 class="text-xl font-semibold mb-4">Admin — Users</h2>
+      <ul id="users-list" class="flex flex-col gap-2 text-sm"></ul>
+    </section>
 
-        async function logout() {
-            await supabaseClient.auth.signOut();
-            checkUser(); // Update the screen
-        }
+  </div>
 
-        // 3. FILE UPLOADING
-        async function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            const messageEl = document.getElementById('upload-message');
+<script>
+  // ========================================================
+  // CONFIG — replace with your project's values
+  // ========================================================
+  const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';
+  const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            if (!file) {
-                messageEl.textContent = 'Please select a file first.';
-                return;
-            }
+  // ========================================================
+  // STATE
+  // ========================================================
+  let currentUser = null;
+  let currentProfile = null;
 
-            // Get current user
-            const { data: { user } } = await supabaseClient.auth.getUser();
+  // ========================================================
+  // HELPERS
+  // ========================================================
+  const $ = (id) => document.getElementById(id);
+  const show = (el) => el.classList.remove('hidden');
+  const hide = (el) => el.classList.add('hidden');
+  const isStaff = () => !!currentProfile && (currentProfile.role === 'moderator' || currentProfile.role === 'admin');
+  const isAdmin = () => !!currentProfile && currentProfile.role === 'admin';
 
-            // Upload to Supabase Storage bucket named 'files'
-            // We add the timestamp to the filename so files don't overwrite each other
-            const filePath = `${user.id}/${Date.now()}_${file.name}`;
-            
-            const { data, error } = await supabaseClient.storage
-                .from('files')
-                .upload(filePath, file);
+  function esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
 
-            if (error) {
-                messageEl.textContent = 'Error: ' + error.message;
-                messageEl.className = 'text-red-500 text-sm mt-2';
-            } else {
-                // Save the file record to the database table 'shared_files'
-                await supabaseClient.from('shared_files').insert({
-                    user_id: user.id,
-                    file_name: file.name,
-                    file_path: filePath
-                });
+  // ========================================================
+  // AUTH
+  // ========================================================
+  async function login() {
+    const email = $('email').value;
+    const password = $('password').value;
+    const msg = $('auth-message');
+    msg.textContent = '';
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      msg.textContent = error.message;
+      msg.className = 'text-red-500 text-sm mt-3 text-center';
+    } else {
+      await refresh();
+    }
+  }
 
-                messageEl.textContent = 'File uploaded successfully!';
-                messageEl.className = 'text-green-500 text-sm mt-2';
-                fileInput.value = ''; // Clear input
-                loadFiles(); // Refresh the list
-            }
-        }
+  async function signup() {
+    const email = $('email').value;
+    const password = $('password').value;
+    const msg = $('auth-message');
+    msg.textContent = '';
+    const { error } = await sb.auth.signUp({ email, password });
+    if (error) {
+      msg.textContent = error.message;
+      msg.className = 'text-red-500 text-sm mt-3 text-center';
+    } else {
+      msg.textContent = 'Check your email to confirm, then sign in.';
+      msg.className = 'text-green-600 text-sm mt-3 text-center';
+    }
+  }
 
-        // 4. DISPLAYING FILES
-        async function loadFiles() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) return;
+  async function logout() {
+    await sb.auth.signOut();
+    currentUser = null;
+    currentProfile = null;
+    await refresh();
+  }
 
-            const fileList = document.getElementById('file-list');
-            fileList.innerHTML = '<li class="text-gray-400">Loading...</li>';
+  // Delete own app data: storage files, shared_files rows, reports authored.
+  // Does NOT delete the auth.users row (that requires admin/service role).
+  async function deleteMyData() {
+    if (!currentUser) return;
+    if (!confirm('Delete all your files, reports, and app data? This cannot be undone.')) return;
 
-            // Fetch files belonging to the current user
-            const { data, error } = await supabaseClient
-                .from('shared_files')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
+    const { data: rows } = await sb
+      .from('shared_files')
+      .select('file_path')
+      .eq('user_id', currentUser.id);
 
-            if (error) {
-                fileList.innerHTML = `<li class="text-red-500">Error loading files: ${error.message}</li>`;
-                return;
-            }
+    if (rows && rows.length) {
+      await sb.storage.from('files').remove(rows.map((r) => r.file_path));
+    }
+    await sb.from('shared_files').delete().eq('user_id', currentUser.id);
+    await sb.from('reports').delete().eq('reporter_id', currentUser.id);
 
-            if (data.length === 0) {
-                fileList.innerHTML = '<li class="text-gray-400">You haven\'t uploaded any files yet.</li>';
-                return;
-            }
+    alert('Your app data has been deleted. You may now log out.');
+    await logout();
+  }
 
-            fileList.innerHTML = ''; // Clear loading text
+  // ========================================================
+  // FILES (own)
+  // ========================================================
+  async function uploadFile() {
+    const input = $('fileInput');
+    const file = input.files[0];
+    const msg = $('upload-message');
+    msg.textContent = '';
 
-            data.forEach(fileRecord => {
-                // Get the public URL for the file
-                const { data: urlData } = supabaseClient.storage
-                    .from('files')
-                    .getPublicUrl(fileRecord.file_path);
+    if (!file) { msg.textContent = 'Pick a file first.'; return; }
+    if (!currentUser) return;
 
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center border-b pb-2';
-                li.innerHTML = `
-                    <a href="${urlData.publicUrl}" target="_blank" class="text-blue-600 hover:underline truncate w-2/3">${fileRecord.file_name}</a>
-                    <button onclick="deleteFile('${fileRecord.id}', '${fileRecord.file_path}')" class="text-red-500 text-sm hover:underline">Delete</button>
-                `;
-                fileList.appendChild(li);
-            });
-        }
+    const path = `${currentUser.id}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await sb.storage.from('files').upload(path, file);
+    if (upErr) {
+      msg.textContent = upErr.message;
+      msg.className = 'text-red-500 text-sm mt-2';
+      return;
+    }
 
-        // 5. DELETING FILES
-        async function deleteFile(id, path) {
-            if (!confirm('Are you sure you want to delete this file?')) return;
+    const { error: dbErr } = await sb.from('shared_files').insert({
+      user_id: currentUser.id,
+      file_name: file.name,
+      file_path: path,
+    });
+    if (dbErr) {
+      msg.textContent = dbErr.message;
+      msg.className = 'text-red-500 text-sm mt-2';
+      return;
+    }
 
-            // 1. Delete from Storage
-            await supabaseClient.storage.from('files').remove([path]);
-            
-            // 2. Delete from Database
-            await supabaseClient.from('shared_files').delete().eq('id', id);
+    msg.textContent = 'Uploaded!';
+    msg.className = 'text-green-600 text-sm mt-2';
+    input.value = '';
+    await loadMyFiles();
+    if (isStaff()) await loadModeration();
+  }
 
-            loadFiles(); // Refresh list
-        }
+  async function loadMyFiles() {
+    if (!currentUser) return;
+    const ul = $('file-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
 
-        // 6. CHECK LOGIN STATE ON PAGE LOAD
-        async function checkUser() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data, error } = await sb
+      .from('shared_files')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
 
-            const authSection = document.getElementById('auth-section');
-            const uploadSection = document.getElementById('upload-section');
-            const filesSection = document.getElementById('files-section');
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No files yet.</li>'; return; }
 
-            if (user) {
-                // User is logged in
-                authSection.classList.add('hidden');
-                uploadSection.classList.remove('hidden');
-                filesSection.classList.remove('hidden');
-                loadFiles();
-            } else {
-                // User is logged out
-                authSection.classList.remove('hidden');
-                uploadSection.classList.add('hidden');
-                filesSection.classList.add('hidden');
-            }
-        }
+    ul.innerHTML = '';
+    for (const f of data) {
+      const { data: urlData } = sb.storage.from('files').getPublicUrl(f.file_path);
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border-b pb-2 gap-2';
+      li.innerHTML = `
+        <div class="truncate">
+          <a href="${urlData.publicUrl}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">${esc(f.file_name)}</a>
+          ${f.is_removed ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">removed</span>' : ''}
+        </div>
+        <div class="flex gap-2 shrink-0">
+          ${f.is_removed ? '' : `<button class="text-orange-600 text-xs hover:underline" onclick="reportFile('${f.id}')">Report</button>`}
+          <button class="text-red-500 text-xs hover:underline" onclick="deleteOwnFile('${f.id}','${esc(f.file_path)}')">Delete</button>
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
 
-        // Listen for auth changes (e.g. clicking the confirmation link in email)
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            checkUser();
-        });
+  async function deleteOwnFile(id, path) {
+    if (!confirm('Delete this file?')) return;
+    await sb.storage.from('files').remove([path]);
+    await sb.from('shared_files').delete().eq('id', id);
+    await loadMyFiles();
+    if (isStaff()) await loadModeration();
+  }
 
-        // Run on page load
-        checkUser();
-    </script>
+  // ========================================================
+  // REPORTING (any authenticated user reports a post)
+  // ========================================================
+  async function reportFile(fileId) {
+    if (!currentUser) return;
+    const reason = prompt('Why are you reporting this file? (1-500 chars)');
+    if (!reason) return;
+
+    const { error } = await sb.from('reports').insert({
+      file_id: fileId,
+      reporter_id: currentUser.id,
+      reason: reason.slice(0, 500),
+    });
+    if (error) alert(error.message);
+    else alert('Report submitted.');
+    await loadMyReports();
+  }
+
+  async function loadMyReports() {
+    if (!currentUser) return;
+    const ul = $('my-reports-list');
+    ul.innerHTML = '';
+    const { data, error } = await sb
+      .from('reports')
+      .select('id, reason, status, created_at, file_id, shared_files(file_name)')
+      .eq('reporter_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No reports.</li>'; return; }
+
+    for (const r of data) {
+      const li = document.createElement('li');
+      li.className = 'border-b pb-2';
+      const badge = r.status === 'open'
+        ? 'bg-yellow-100 text-yellow-800'
+        : r.status === 'resolved'
+        ? 'bg-green-100 text-green-800'
+        : 'bg-gray-200 text-gray-700';
+      li.innerHTML = `
+        <div class="font-medium">${esc(r.shared_files?.file_name ?? r.file_id)}</div>
+        <div class="text-gray-600">${esc(r.reason)}</div>
+        <div class="text-xs mt-1">
+          <span class="px-2 py-0.5 rounded ${badge}">${esc(r.status)}</span>
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  // ========================================================
+  // MODERATION
+  // ========================================================
+  async function loadModeration() {
+    if (!isStaff()) return;
+    $('mod-role').textContent = currentProfile.role;
+    await Promise.all([loadOpenReports(), loadAllFilesForStaff()]);
+  }
+
+  async function loadOpenReports() {
+    const ul = $('reports-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
+    const { data, error } = await sb
+      .from('reports')
+      .select('id, reason, status, file_id, reporter_id, created_at, shared_files(file_name, file_path, user_id, is_removed)')
+      .eq('status', 'open')
+      .order('created_at', { ascending: true });
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No open reports.</li>'; return; }
+
+    ul.innerHTML = '';
+    for (const r of data) {
+      const authorId = r.shared_files?.user_id ?? '';
+      const li = document.createElement('li');
+      li.className = 'border-b pb-2';
+      li.innerHTML = `
+        <div class="font-medium">${esc(r.shared_files?.file_name ?? r.file_id)}</div>
+        <div class="text-gray-600">${esc(r.reason)}</div>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <button class="bg-red-600 text-white px-2 py-1 rounded text-xs" onclick="removeFileAsStaff('${r.file_id}','${r.id}')">Remove post</button>
+          <button class="bg-gray-600 text-white px-2 py-1 rounded text-xs" onclick="resolveReport('${r.id}','dismissed')">Dismiss</button>
+          ${authorId ? `<button class="bg-yellow-600 text-white px-2 py-1 rounded text-xs" onclick="banUser('${authorId}')">Ban author</button>` : ''}
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function loadAllFilesForStaff() {
+    const ul = $('all-files-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
+    const { data, error } = await sb
+      .from('shared_files')
+      .select('id, file_name, file_path, user_id, is_removed, created_at')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No files.</li>'; return; }
+
+    ul.innerHTML = '';
+    for (const f of data) {
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border-b pb-2 gap-2';
+      li.innerHTML = `
+        <div class="truncate">
+          ${esc(f.file_name)}
+          ${f.is_removed ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">removed</span>' : ''}
+        </div>
+        <div class="flex gap-2 shrink-0">
+          ${f.is_removed ? '' : `<button class="text-red-600 text-xs hover:underline" onclick="removeFileAsStaff('${f.id}', null)">Remove</button>`}
+          <button class="text-yellow-700 text-xs hover:underline" onclick="banUser('${f.user_id}')">Ban author</button>
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function removeFileAsStaff(fileId, reportId) {
+    if (!confirm('Remove this post? The file will be deleted from storage.')) return;
+
+    const { error: updErr } = await sb
+      .from('shared_files')
+      .update({
+        is_removed: true,
+        removed_at: new Date().toISOString(),
+        removed_by: currentUser.id,
+      })
+      .eq('id', fileId);
+    if (updErr) { alert(updErr.message); return; }
+
+    const { data: row } = await sb
+      .from('shared_files')
+      .select('file_path')
+      .eq('id', fileId)
+      .single();
+    if (row?.file_path) {
+      await sb.storage.from('files').remove([row.file_path]);
+    }
+
+    if (reportId) await resolveReport(reportId, 'resolved');
+
+    await loadModeration();
+    await loadMyFiles();
+  }
+
+  async function resolveReport(reportId, status) {
+    const { error } = await sb
+      .from('reports')
+      .update({
+        status,
+        resolved_by: currentUser.id,
+        resolved_at: new Date().toISOString(),
+      })
+      .eq('id', reportId);
+    if (error) alert(error.message);
+    await loadOpenReports();
+  }
+
+  async function banUser(userId) {
+    if (!userId) return;
+    if (!confirm('Ban this user? They will not be able to upload or report.')) return;
+    const { error } = await sb
+      .from('profiles')
+      .update({
+        is_banned: true,
+        banned_at: new Date().toISOString(),
+        banned_by: currentUser.id,
+      })
+      .eq('id', userId);
+    if (error) alert(error.message);
+    else alert('User banned.');
+    if (isAdmin()) await loadAdminUsers();
+  }
+
+  // ========================================================
+  // ADMIN
+  // ========================================================
+  async function loadAdminUsers() {
+    if (!isAdmin()) return;
+    const ul = $('users-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
+    const { data, error } = await sb
+      .from('profiles')
+      .select('id, email, role, is_banned, created_at')
+      .order('created_at', { ascending: true });
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    ul.innerHTML = '';
+    for (const u of data) {
+      const isSelf = u.id === currentUser.id;
+      const roleBtn = (role, label, cls) =>
+        u.role === role || (role === 'moderator' && u.role === 'admin')
+          ? ''
+          : `<button class="${cls} text-xs hover:underline" onclick="setRole('${u.id}','${role}')">${label}</button>`;
+
+      const banBtn = u.is_banned
+        ? `<button class="text-green-600 text-xs hover:underline" onclick="unbanUser('${u.id}')">Unban</button>`
+        : `<button class="text-red-600 text-xs hover:underline" onclick="banUser('${u.id}')">Ban</button>`;
+
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border-b pb-2 gap-2';
+      li.innerHTML = `
+        <div class="truncate">
+          <span class="font-medium">${esc(u.email ?? u.id)}</span>
+          <span class="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${esc(u.role)}</span>
+          ${u.is_banned ? '<span class="ml-1 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">banned</span>' : ''}
+          ${isSelf ? '<span class="ml-1 text-xs text-gray-400">(you)</span>' : ''}
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0 justify-end">
+          ${isSelf ? '' : roleBtn('user', 'Make user', 'text-gray-600')}
+          ${isSelf ? '' : roleBtn('moderator', 'Make mod', 'text-purple-600')}
+          ${isSelf ? '' : roleBtn('admin', 'Make admin', 'text-indigo-600')}
+          ${isSelf ? '' : banBtn}
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function setRole(userId, role) {
+    if (!isAdmin()) return;
+    if (!confirm(`Set this user's role to "${role}"?`)) return;
+    const { error } = await sb
+      .from('profiles')
+      .update({ role })
+      .eq('id', userId);
+    if (error) alert(error.message);
+    else alert('Role updated.');
+    await loadAdminUsers();
+  }
+
+  async function unbanUser(userId) {
+    if (!isAdmin()) return;
+    if (!confirm('Unban this user?')) return;
+    const { error } = await sb
+      .from('profiles')
+      .update({ is_banned: false, banned_at: null, banned_by: null })
+      .eq('id', userId);
+    if (error) alert(error.message);
+    else alert('User unbanned.');
+    await loadAdminUsers();
+  }
+
+  // ========================================================
+  // STATE REFRESH
+  // ========================================================
+  async function loadProfile() {
+    if (!currentUser) { currentProfile = null; return; }
+    const { data, error } = await sb
+      .from('profiles')
+      .select('id, email, role, is_banned')
+      .eq('id', currentUser.id)
+      .single();
+    if (error) {
+      console.warn('profile load failed', error);
+      currentProfile = null;
+    } else {
+      currentProfile = data;
+    }
+  }
+
+  async function refresh() {
+    const { data: { user } } = await sb.auth.getUser();
+    currentUser = user || null;
+    await loadProfile();
+
+    const authSection = $('auth-section');
+    const uploadSection = $('upload-section');
+    const filesSection = $('files-section');
+    const myReportsSection = $('my-reports-section');
+    const modPanel = $('mod-panel');
+    const adminPanel = $('admin-panel');
+    const userBadge = $('user-badge');
+    const bannedBanner = $('banned-banner');
+
+    if (currentUser && currentProfile) {
+      hide(authSection);
+      show(uploadSection);
+      show(filesSection);
+      show(myReportsSection);
+      userBadge.textContent = `${currentProfile.email ?? currentUser.email} — ${currentProfile.role}`;
+      show(userBadge);
+
+      if (currentProfile.is_banned) show(bannedBanner);
+      else hide(bannedBanner);
+
+      // Hide upload/report controls visually when banned; RLS enforces it anyway
+      $('fileInput').disabled = !!currentProfile.is_banned;
+
+      if (isStaff()) {
+        show(modPanel);
+        await loadModeration();
+      } else {
+        hide(modPanel);
+      }
+
+      if (isAdmin()) {
+        show(adminPanel);
+        await loadAdminUsers();
+      } else {
+        hide(adminPanel);
+      }
+
+      await loadMyFiles();
+      await loadMyReports();
+    } else {
+      show(authSection);
+      hide(uploadSection);
+      hide(filesSection);
+      hide(myReportsSection);
+      hide(modPanel);
+      hide(adminPanel);
+      hide(userBadge);
+      hide(bannedBanner);
+    }
+  }
+
+  // ========================================================
+  // BOOT
+  // ========================================================
+  sb.auth.onAuthStateChange(() => { refresh(); });
+  refresh();
+</script>
 </body>
 </html>
