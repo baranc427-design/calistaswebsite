@@ -10,10 +10,19 @@
 <body class="bg-gray-100 text-gray-800 font-sans p-6">
   <div class="max-w-3xl mx-auto">
 
-    <header class="flex items-center justify-between mb-6">
+    <header class="flex items-center justify-between mb-4">
       <h1 class="text-2xl font-bold">🍳 Cooking Helper</h1>
       <div id="user-badge" class="text-sm text-gray-500 hidden"></div>
     </header>
+
+    <!-- TABS -->
+    <nav id="tabs" class="flex flex-wrap gap-2 mb-6 hidden">
+      <button data-tab="technique" class="tab-btn px-4 py-2 rounded bg-blue-600 text-white font-semibold">🥘 Techniques</button>
+      <button data-tab="recipe"    class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border">📖 Recipes</button>
+      <button data-tab="mine"      class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border ml-auto">👤 My Stuff</button>
+      <button data-tab="mod"       class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border hidden">🛡 Moderation</button>
+      <button data-tab="admin"     class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border hidden">⚙️ Admin</button>
+    </nav>
 
     <!-- BANNED BANNER -->
     <div id="banned-banner" class="hidden bg-red-100 text-red-800 p-3 rounded mb-4 text-sm">
@@ -34,66 +43,81 @@
       <p id="auth-message" class="text-sm mt-3 text-center"></p>
     </section>
 
-    <!-- UPLOAD -->
-    <section id="upload-section" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold">Upload a File</h2>
-        <button onclick="logout()" class="text-sm text-red-500 hover:underline">Log Out</button>
+    <!-- TAB: TECHNIQUES / RECIPES -->
+    <section id="feed-section" class="hidden">
+      <div class="bg-white p-4 rounded-lg shadow mb-4">
+        <h2 id="feed-title" class="text-xl font-semibold mb-3">Techniques</h2>
+
+        <div id="feed-upload" class="flex flex-col gap-2 mb-4 pb-4 border-b">
+          <input id="feed-file" type="file" accept="video/*,image/*,.pdf,.txt,.doc,.docx" class="text-sm" />
+          <div class="flex gap-2">
+            <input id="feed-title-input" type="text" placeholder="Title (optional, defaults to filename)" class="border p-2 rounded flex-1 text-sm" />
+            <button id="feed-upload-btn" class="bg-blue-600 text-white px-4 py-2 rounded text-sm">Upload</button>
+          </div>
+          <p id="feed-upload-msg" class="text-sm"></p>
+        </div>
+
+        <ul id="feed-list" class="flex flex-col gap-3"></ul>
       </div>
-      <input id="fileInput" type="file" class="mb-3 block w-full text-sm" />
-      <button onclick="uploadFile()" class="bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
-      <p id="upload-message" class="text-sm mt-2"></p>
-      <div class="mt-4 pt-4 border-t">
-        <button onclick="deleteMyData()" class="text-xs text-red-600 hover:underline">Delete my account data</button>
-      </div>
     </section>
 
-    <!-- MY FILES -->
-    <section id="files-section" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
-      <h2 class="text-xl font-semibold mb-4">My Files</h2>
-      <ul id="file-list" class="flex flex-col gap-2"></ul>
-    </section>
-
-    <!-- MY REPORTS -->
-    <section id="my-reports-section" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
-      <h2 class="text-xl font-semibold mb-4">My Reports</h2>
-      <ul id="my-reports-list" class="flex flex-col gap-2 text-sm"></ul>
-    </section>
-
-    <!-- MODERATION PANEL -->
-    <section id="mod-panel" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold">Moderation</h2>
-        <span id="mod-role" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded"></span>
+    <!-- TAB: MY STUFF -->
+    <section id="mine-section" class="hidden">
+      <div class="bg-white p-6 rounded-lg shadow mb-4">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-xl font-semibold">My Files</h2>
+          <button onclick="logout()" class="text-sm text-red-500 hover:underline">Log Out</button>
+        </div>
+        <ul id="file-list" class="flex flex-col gap-2"></ul>
+        <div class="mt-4 pt-4 border-t">
+          <button onclick="deleteMyData()" class="text-xs text-red-600 hover:underline">Delete my account data</button>
+        </div>
       </div>
 
-      <h3 class="font-semibold mt-2 mb-2">Open Reports</h3>
-      <ul id="reports-list" class="flex flex-col gap-2 text-sm"></ul>
-
-      <h3 class="font-semibold mt-6 mb-2">All Files</h3>
-      <ul id="all-files-list" class="flex flex-col gap-2 text-sm"></ul>
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-3">My Reports</h2>
+        <ul id="my-reports-list" class="flex flex-col gap-2 text-sm"></ul>
+      </div>
     </section>
 
-    <!-- ADMIN PANEL -->
-    <section id="admin-panel" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
-      <h2 class="text-xl font-semibold mb-4">Admin — Users</h2>
-      <ul id="users-list" class="flex flex-col gap-2 text-sm"></ul>
+    <!-- TAB: MODERATION -->
+    <section id="mod-section" class="hidden">
+      <div class="bg-white p-6 rounded-lg shadow mb-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold">Moderation</h2>
+          <span id="mod-role" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded"></span>
+        </div>
+        <h3 class="font-semibold mt-2 mb-2">Open Reports</h3>
+        <ul id="reports-list" class="flex flex-col gap-2 text-sm"></ul>
+        <h3 class="font-semibold mt-6 mb-2">All Files</h3>
+        <ul id="all-files-list" class="flex flex-col gap-2 text-sm"></ul>
+      </div>
+    </section>
+
+    <!-- TAB: ADMIN -->
+    <section id="admin-section" class="hidden">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Admin — Users</h2>
+        <ul id="users-list" class="flex flex-col gap-2 text-sm"></ul>
+      </div>
     </section>
 
   </div>
 
 <script>
   // ========================================================
-  // CONFIG — replace with your project's values
+  // CONFIG
   // ========================================================
   const SUPABASE_URL = 'https://vhruvaprxsraodmtwbzd.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_TVYFUxb04pH-_2Bh6hGYZQ_J2e8Tba9';
-  const sb = supabase.createClient('https://vhruvaprxsraodmtwbzd.supabase.co','sb_publishable_TVYFUxb04pH-_2Bh6hGYZQ_J2e8Tba9');
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   // ========================================================
   // STATE
   // ========================================================
   let currentUser = null;
   let currentProfile = null;
+  let currentTab = 'technique';
 
   // ========================================================
   // HELPERS
@@ -108,6 +132,22 @@
     return String(str ?? '').replace(/[&<>"']/g, (c) => (
       { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
     ));
+  }
+
+  function ext(name) {
+    const m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+    return m ? m[1] : '';
+  }
+
+  function mediaTag(url, name) {
+    const e = ext(name);
+    if (['mp4','webm','ogg','mov','m4v'].includes(e)) {
+      return `<video src="${url}" controls preload="metadata" class="rounded max-h-64 w-full bg-black"></video>`;
+    }
+    if (['jpg','jpeg','png','gif','webp','svg','bmp'].includes(e)) {
+      return `<img src="${url}" alt="${esc(name)}" class="rounded max-h-64 w-full object-contain bg-gray-50" />`;
+    }
+    return `<a href="${url}" target="_blank" rel="noopener" class="inline-block text-blue-600 hover:underline text-sm break-all">📎 ${esc(name)}</a>`;
   }
 
   // ========================================================
@@ -149,17 +189,11 @@
     await refresh();
   }
 
-  // Delete own app data: storage files, shared_files rows, reports authored.
-  // Does NOT delete the auth.users row (that requires admin/service role).
   async function deleteMyData() {
     if (!currentUser) return;
     if (!confirm('Delete all your files, reports, and app data? This cannot be undone.')) return;
 
-    const { data: rows } = await sb
-      .from('shared_files')
-      .select('file_path')
-      .eq('user_id', currentUser.id);
-
+    const { data: rows } = await sb.from('shared_files').select('file_path').eq('user_id', currentUser.id);
     if (rows && rows.length) {
       await sb.storage.from('files').remove(rows.map((r) => r.file_path));
     }
@@ -171,43 +205,122 @@
   }
 
   // ========================================================
-  // FILES (own)
+  // TABS
   // ========================================================
-  async function uploadFile() {
-    const input = $('fileInput');
-    const file = input.files[0];
-    const msg = $('upload-message');
-    msg.textContent = '';
+  function setTab(tab) {
+    currentTab = tab;
 
-    if (!file) { msg.textContent = 'Pick a file first.'; return; }
-    if (!currentUser) return;
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      const active = btn.dataset.tab === tab;
+      btn.classList.toggle('bg-blue-600', active);
+      btn.classList.toggle('text-white', active);
+      btn.classList.toggle('bg-white', !active);
+      btn.classList.toggle('text-gray-700', !active);
+      btn.classList.toggle('border', !active);
+    });
 
-    const path = `${currentUser.id}/${Date.now()}_${file.name}`;
-    const { error: upErr } = await sb.storage.from('files').upload(path, file);
-    if (upErr) {
-      msg.textContent = upErr.message;
-      msg.className = 'text-red-500 text-sm mt-2';
-      return;
+    ['feed-section','mine-section','mod-section','admin-section'].forEach((id) => hide($(id)));
+    if (tab === 'technique' || tab === 'recipe') {
+      show($('feed-section'));
+      $('feed-title').textContent = tab === 'technique' ? 'Cooking Techniques' : 'Recipes & Dishes';
+      loadFeed(tab);
+    } else if (tab === 'mine') {
+      show($('mine-section'));
+      loadMyFiles();
+      loadMyReports();
+    } else if (tab === 'mod') {
+      show($('mod-section'));
+      loadModeration();
+    } else if (tab === 'admin') {
+      show($('admin-section'));
+      loadAdminUsers();
     }
+  }
 
+  // ========================================================
+  // PUBLIC FEED
+  // ========================================================
+  async function loadFeed(category) {
+    const ul = $('feed-list');
+    ul.innerHTML = '<li class="text-gray-400 text-sm">Loading…</li>';
+
+    const { data, error } = await sb
+      .from('shared_files')
+      .select('id, user_id, file_name, file_path, category, created_at')
+      .eq('category', category)
+      .eq('is_public', true)
+      .eq('is_removed', false)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) { ul.innerHTML = `<li class="text-red-500 text-sm">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400 text-sm">Nothing here yet. Be the first to upload!</li>'; return; }
+
+    ul.innerHTML = '';
+    for (const f of data) {
+      const { data: urlData } = sb.storage.from('files').getPublicUrl(f.file_path);
+      const isMine = f.user_id === currentUser?.id;
+      const li = document.createElement('li');
+      li.className = 'border rounded-lg p-3 flex flex-col gap-2';
+      li.innerHTML = `
+        ${mediaTag(urlData.publicUrl, f.file_name)}
+        <div class="flex justify-between items-center gap-2">
+          <div class="text-xs text-gray-500">
+            ${esc(f.file_name)} · ${new Date(f.created_at).toLocaleDateString()}
+            ${isMine ? '<span class="ml-1 text-blue-600">(you)</span>' : ''}
+          </div>
+          <div class="flex gap-2 shrink-0">
+            ${isMine ? '' : `<button class="text-orange-600 text-xs hover:underline" onclick="reportFile('${f.id}')">Report</button>`}
+            ${isMine ? `<button class="text-red-500 text-xs hover:underline" onclick="deleteOwnFile('${f.id}','${esc(f.file_path)}')">Delete</button>` : ''}
+          </div>
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function uploadToFeed() {
+    const input = $('feed-file');
+    const titleInput = $('feed-title-input');
+    const msg = $('feed-upload-msg');
+    const file = input.files[0];
+    msg.textContent = '';
+    msg.className = 'text-sm';
+
+    if (!currentUser) return;
+    if (!file) { msg.textContent = 'Pick a file first.'; msg.className = 'text-red-500 text-sm'; return; }
+
+    const category = currentTab === 'technique' ? 'technique' : 'recipe';
+    const safeName = file.name.replace(/[^\w.\- ]+/g, '_');
+    const path = `${currentUser.id}/${Date.now()}_${safeName}`;
+
+    const { error: upErr } = await sb.storage.from('files').upload(path, file);
+    if (upErr) { msg.textContent = upErr.message; msg.className = 'text-red-500 text-sm'; return; }
+
+    const displayName = (titleInput.value || file.name).slice(0, 200);
     const { error: dbErr } = await sb.from('shared_files').insert({
       user_id: currentUser.id,
-      file_name: file.name,
+      file_name: displayName,
       file_path: path,
+      category,
+      is_public: true,
     });
     if (dbErr) {
+      await sb.storage.from('files').remove([path]);
       msg.textContent = dbErr.message;
-      msg.className = 'text-red-500 text-sm mt-2';
+      msg.className = 'text-red-500 text-sm';
       return;
     }
 
     msg.textContent = 'Uploaded!';
-    msg.className = 'text-green-600 text-sm mt-2';
+    msg.className = 'text-green-600 text-sm';
     input.value = '';
-    await loadMyFiles();
-    if (isStaff()) await loadModeration();
+    titleInput.value = '';
+    await loadFeed(category);
   }
 
+  // ========================================================
+  // MY FILES
+  // ========================================================
   async function loadMyFiles() {
     if (!currentUser) return;
     const ul = $('file-list');
@@ -230,6 +343,7 @@
       li.innerHTML = `
         <div class="truncate">
           <a href="${urlData.publicUrl}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">${esc(f.file_name)}</a>
+          <span class="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${esc(f.category)}</span>
           ${f.is_removed ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">removed</span>' : ''}
         </div>
         <div class="flex gap-2 shrink-0">
@@ -245,11 +359,12 @@
     await sb.storage.from('files').remove([path]);
     await sb.from('shared_files').delete().eq('id', id);
     await loadMyFiles();
+    if (currentTab === 'technique' || currentTab === 'recipe') await loadFeed(currentTab);
     if (isStaff()) await loadModeration();
   }
 
   // ========================================================
-  // REPORTING (any authenticated user reports a post)
+  // REPORTING
   // ========================================================
   async function reportFile(fileId) {
     if (!currentUser) return;
@@ -263,7 +378,7 @@
     });
     if (error) alert(error.message);
     else alert('Report submitted.');
-    await loadMyReports();
+    if (currentTab === 'mine') await loadMyReports();
   }
 
   async function loadMyReports() {
@@ -290,9 +405,7 @@
       li.innerHTML = `
         <div class="font-medium">${esc(r.shared_files?.file_name ?? r.file_id)}</div>
         <div class="text-gray-600">${esc(r.reason)}</div>
-        <div class="text-xs mt-1">
-          <span class="px-2 py-0.5 rounded ${badge}">${esc(r.status)}</span>
-        </div>`;
+        <div class="text-xs mt-1"><span class="px-2 py-0.5 rounded ${badge}">${esc(r.status)}</span></div>`;
       ul.appendChild(li);
     }
   }
@@ -340,7 +453,7 @@
     ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
     const { data, error } = await sb
       .from('shared_files')
-      .select('id, file_name, file_path, user_id, is_removed, created_at')
+      .select('id, file_name, file_path, user_id, category, is_removed, created_at')
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -354,6 +467,7 @@
       li.innerHTML = `
         <div class="truncate">
           ${esc(f.file_name)}
+          <span class="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${esc(f.category)}</span>
           ${f.is_removed ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">removed</span>' : ''}
         </div>
         <div class="flex gap-2 shrink-0">
@@ -377,29 +491,19 @@
       .eq('id', fileId);
     if (updErr) { alert(updErr.message); return; }
 
-    const { data: row } = await sb
-      .from('shared_files')
-      .select('file_path')
-      .eq('id', fileId)
-      .single();
-    if (row?.file_path) {
-      await sb.storage.from('files').remove([row.file_path]);
-    }
+    const { data: row } = await sb.from('shared_files').select('file_path').eq('id', fileId).single();
+    if (row?.file_path) await sb.storage.from('files').remove([row.file_path]);
 
     if (reportId) await resolveReport(reportId, 'resolved');
 
     await loadModeration();
-    await loadMyFiles();
+    if (currentTab === 'technique' || currentTab === 'recipe') await loadFeed(currentTab);
   }
 
   async function resolveReport(reportId, status) {
     const { error } = await sb
       .from('reports')
-      .update({
-        status,
-        resolved_by: currentUser.id,
-        resolved_at: new Date().toISOString(),
-      })
+      .update({ status, resolved_by: currentUser.id, resolved_at: new Date().toISOString() })
       .eq('id', reportId);
     if (error) alert(error.message);
     await loadOpenReports();
@@ -410,11 +514,7 @@
     if (!confirm('Ban this user? They will not be able to upload or report.')) return;
     const { error } = await sb
       .from('profiles')
-      .update({
-        is_banned: true,
-        banned_at: new Date().toISOString(),
-        banned_by: currentUser.id,
-      })
+      .update({ is_banned: true, banned_at: new Date().toISOString(), banned_by: currentUser.id })
       .eq('id', userId);
     if (error) alert(error.message);
     else alert('User banned.');
@@ -441,7 +541,6 @@
         u.role === role || (role === 'moderator' && u.role === 'admin')
           ? ''
           : `<button class="${cls} text-xs hover:underline" onclick="setRole('${u.id}','${role}')">${label}</button>`;
-
       const banBtn = u.is_banned
         ? `<button class="text-green-600 text-xs hover:underline" onclick="unbanUser('${u.id}')">Unban</button>`
         : `<button class="text-red-600 text-xs hover:underline" onclick="banUser('${u.id}')">Ban</button>`;
@@ -468,10 +567,7 @@
   async function setRole(userId, role) {
     if (!isAdmin()) return;
     if (!confirm(`Set this user's role to "${role}"?`)) return;
-    const { error } = await sb
-      .from('profiles')
-      .update({ role })
-      .eq('id', userId);
+    const { error } = await sb.from('profiles').update({ role }).eq('id', userId);
     if (error) alert(error.message);
     else alert('Role updated.');
     await loadAdminUsers();
@@ -490,7 +586,7 @@
   }
 
   // ========================================================
-  // STATE REFRESH
+  // REFRESH / BOOT
   // ========================================================
   async function loadProfile() {
     if (!currentUser) { currentProfile = null; return; }
@@ -499,12 +595,8 @@
       .select('id, email, role, is_banned')
       .eq('id', currentUser.id)
       .single();
-    if (error) {
-      console.warn('profile load failed', error);
-      currentProfile = null;
-    } else {
-      currentProfile = data;
-    }
+    if (error) { console.warn('profile load failed', error); currentProfile = null; }
+    else currentProfile = data;
   }
 
   async function refresh() {
@@ -513,59 +605,699 @@
     await loadProfile();
 
     const authSection = $('auth-section');
-    const uploadSection = $('upload-section');
-    const filesSection = $('files-section');
-    const myReportsSection = $('my-reports-section');
-    const modPanel = $('mod-panel');
-    const adminPanel = $('admin-panel');
-    const userBadge = $('user-badge');
+    const tabs = $('tabs');
     const bannedBanner = $('banned-banner');
+    const userBadge = $('user-badge');
 
     if (currentUser && currentProfile) {
       hide(authSection);
-      show(uploadSection);
-      show(filesSection);
-      show(myReportsSection);
+      show(tabs);
       userBadge.textContent = `${currentProfile.email ?? currentUser.email} — ${currentProfile.role}`;
       show(userBadge);
 
       if (currentProfile.is_banned) show(bannedBanner);
       else hide(bannedBanner);
 
-      // Hide upload/report controls visually when banned; RLS enforces it anyway
-      $('fileInput').disabled = !!currentProfile.is_banned;
+      document.querySelectorAll('.tab-btn[data-tab="mod"]').forEach((b) => {
+        if (isStaff()) show(b); else hide(b);
+      });
+      document.querySelectorAll('.tab-btn[data-tab="admin"]').forEach((b) => {
+        if (isAdmin()) show(b); else hide(b);
+      });
 
-      if (isStaff()) {
-        show(modPanel);
-        await loadModeration();
-      } else {
-        hide(modPanel);
+      const feedUpload = $('feed-upload');
+      if (currentProfile.is_banned) hide(feedUpload); else show(feedUpload);
+
+      if ((currentTab === 'mod' && !isStaff()) || (currentTab === 'admin' && !isAdmin())) {
+        currentTab = 'technique';
       }
-
-      if (isAdmin()) {
-        show(adminPanel);
-        await loadAdminUsers();
-      } else {
-        hide(adminPanel);
-      }
-
-      await loadMyFiles();
-      await loadMyReports();
+      setTab(currentTab);
     } else {
       show(authSection);
-      hide(uploadSection);
-      hide(filesSection);
-      hide(myReportsSection);
-      hide(modPanel);
-      hide(adminPanel);
+      hide(tabs);
+      ['feed-section','mine-section','mod-section','admin-section'].forEach((id) => hide($(id)));
       hide(userBadge);
       hide(bannedBanner);
     }
   }
 
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setTab(btn.dataset.tab));
+  });
+  $('feed-upload-btn').addEventListener('click', uploadToFeed);
+
+  sb.auth.onAuthStateChange(() => { refresh(); });
+  refresh();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cooking Helper</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-6">
+  <div class="max-w-3xl mx-auto">
+
+    <header class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-bold">🍳 Cooking Helper</h1>
+      <div id="user-badge" class="text-sm text-gray-500 hidden"></div>
+    </header>
+
+    <!-- TABS -->
+    <nav id="tabs" class="flex flex-wrap gap-2 mb-6 hidden">
+      <button data-tab="technique" class="tab-btn px-4 py-2 rounded bg-blue-600 text-white font-semibold">🥘 Techniques</button>
+      <button data-tab="recipe"    class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border">📖 Recipes</button>
+      <button data-tab="mine"      class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border ml-auto">👤 My Stuff</button>
+      <button data-tab="mod"       class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border hidden">🛡 Moderation</button>
+      <button data-tab="admin"     class="tab-btn px-4 py-2 rounded bg-white text-gray-700 font-semibold border hidden">⚙️ Admin</button>
+    </nav>
+
+    <!-- BANNED BANNER -->
+    <div id="banned-banner" class="hidden bg-red-100 text-red-800 p-3 rounded mb-4 text-sm">
+      Your account has been banned. You cannot upload or report posts.
+    </div>
+
+    <!-- AUTH -->
+    <section id="auth-section" class="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">Sign In or Sign Up</h2>
+      <form id="auth-form" class="flex flex-col gap-3" onsubmit="return false;">
+        <input id="email" type="email" placeholder="Email" required class="border p-2 rounded" />
+        <input id="password" type="password" placeholder="Password (min 8 chars)" required class="border p-2 rounded" />
+        <div class="flex gap-2">
+          <button type="button" onclick="login()" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Sign In</button>
+          <button type="button" onclick="signup()" class="bg-green-600 text-white px-4 py-2 rounded w-full">Sign Up</button>
+        </div>
+      </form>
+      <p id="auth-message" class="text-sm mt-3 text-center"></p>
+    </section>
+
+    <!-- TAB: TECHNIQUES / RECIPES -->
+    <section id="feed-section" class="hidden">
+      <div class="bg-white p-4 rounded-lg shadow mb-4">
+        <h2 id="feed-title" class="text-xl font-semibold mb-3">Techniques</h2>
+
+        <div id="feed-upload" class="flex flex-col gap-2 mb-4 pb-4 border-b">
+          <input id="feed-file" type="file" accept="video/*,image/*,.pdf,.txt,.doc,.docx" class="text-sm" />
+          <div class="flex gap-2">
+            <input id="feed-title-input" type="text" placeholder="Title (optional, defaults to filename)" class="border p-2 rounded flex-1 text-sm" />
+            <button id="feed-upload-btn" class="bg-blue-600 text-white px-4 py-2 rounded text-sm">Upload</button>
+          </div>
+          <p id="feed-upload-msg" class="text-sm"></p>
+        </div>
+
+        <ul id="feed-list" class="flex flex-col gap-3"></ul>
+      </div>
+    </section>
+
+    <!-- TAB: MY STUFF -->
+    <section id="mine-section" class="hidden">
+      <div class="bg-white p-6 rounded-lg shadow mb-4">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-xl font-semibold">My Files</h2>
+          <button onclick="logout()" class="text-sm text-red-500 hover:underline">Log Out</button>
+        </div>
+        <ul id="file-list" class="flex flex-col gap-2"></ul>
+        <div class="mt-4 pt-4 border-t">
+          <button onclick="deleteMyData()" class="text-xs text-red-600 hover:underline">Delete my account data</button>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-3">My Reports</h2>
+        <ul id="my-reports-list" class="flex flex-col gap-2 text-sm"></ul>
+      </div>
+    </section>
+
+    <!-- TAB: MODERATION -->
+    <section id="mod-section" class="hidden">
+      <div class="bg-white p-6 rounded-lg shadow mb-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold">Moderation</h2>
+          <span id="mod-role" class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded"></span>
+        </div>
+        <h3 class="font-semibold mt-2 mb-2">Open Reports</h3>
+        <ul id="reports-list" class="flex flex-col gap-2 text-sm"></ul>
+        <h3 class="font-semibold mt-6 mb-2">All Files</h3>
+        <ul id="all-files-list" class="flex flex-col gap-2 text-sm"></ul>
+      </div>
+    </section>
+
+    <!-- TAB: ADMIN -->
+    <section id="admin-section" class="hidden">
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Admin — Users</h2>
+        <ul id="users-list" class="flex flex-col gap-2 text-sm"></ul>
+      </div>
+    </section>
+
+  </div>
+
+<script>
   // ========================================================
-  // BOOT
+  // CONFIG
   // ========================================================
+  const SUPABASE_URL = 'https://vhruvaprxsraodmtwbzd.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_TVYFUxb04pH-_2Bh6hGYZQ_J2e8Tba9';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ========================================================
+  // STATE
+  // ========================================================
+  let currentUser = null;
+  let currentProfile = null;
+  let currentTab = 'technique';
+
+  // ========================================================
+  // HELPERS
+  // ========================================================
+  const $ = (id) => document.getElementById(id);
+  const show = (el) => el.classList.remove('hidden');
+  const hide = (el) => el.classList.add('hidden');
+  const isStaff = () => !!currentProfile && (currentProfile.role === 'moderator' || currentProfile.role === 'admin');
+  const isAdmin = () => !!currentProfile && currentProfile.role === 'admin';
+
+  function esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
+  function ext(name) {
+    const m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+    return m ? m[1] : '';
+  }
+
+  function mediaTag(url, name) {
+    const e = ext(name);
+    if (['mp4','webm','ogg','mov','m4v'].includes(e)) {
+      return `<video src="${url}" controls preload="metadata" class="rounded max-h-64 w-full bg-black"></video>`;
+    }
+    if (['jpg','jpeg','png','gif','webp','svg','bmp'].includes(e)) {
+      return `<img src="${url}" alt="${esc(name)}" class="rounded max-h-64 w-full object-contain bg-gray-50" />`;
+    }
+    return `<a href="${url}" target="_blank" rel="noopener" class="inline-block text-blue-600 hover:underline text-sm break-all">📎 ${esc(name)}</a>`;
+  }
+
+  // ========================================================
+  // AUTH
+  // ========================================================
+  async function login() {
+    const email = $('email').value;
+    const password = $('password').value;
+    const msg = $('auth-message');
+    msg.textContent = '';
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      msg.textContent = error.message;
+      msg.className = 'text-red-500 text-sm mt-3 text-center';
+    } else {
+      await refresh();
+    }
+  }
+
+  async function signup() {
+    const email = $('email').value;
+    const password = $('password').value;
+    const msg = $('auth-message');
+    msg.textContent = '';
+    const { error } = await sb.auth.signUp({ email, password });
+    if (error) {
+      msg.textContent = error.message;
+      msg.className = 'text-red-500 text-sm mt-3 text-center';
+    } else {
+      msg.textContent = 'Check your email to confirm, then sign in.';
+      msg.className = 'text-green-600 text-sm mt-3 text-center';
+    }
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    currentUser = null;
+    currentProfile = null;
+    await refresh();
+  }
+
+  async function deleteMyData() {
+    if (!currentUser) return;
+    if (!confirm('Delete all your files, reports, and app data? This cannot be undone.')) return;
+
+    const { data: rows } = await sb.from('shared_files').select('file_path').eq('user_id', currentUser.id);
+    if (rows && rows.length) {
+      await sb.storage.from('files').remove(rows.map((r) => r.file_path));
+    }
+    await sb.from('shared_files').delete().eq('user_id', currentUser.id);
+    await sb.from('reports').delete().eq('reporter_id', currentUser.id);
+
+    alert('Your app data has been deleted. You may now log out.');
+    await logout();
+  }
+
+  // ========================================================
+  // TABS
+  // ========================================================
+  function setTab(tab) {
+    currentTab = tab;
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      const active = btn.dataset.tab === tab;
+      btn.classList.toggle('bg-blue-600', active);
+      btn.classList.toggle('text-white', active);
+      btn.classList.toggle('bg-white', !active);
+      btn.classList.toggle('text-gray-700', !active);
+      btn.classList.toggle('border', !active);
+    });
+
+    ['feed-section','mine-section','mod-section','admin-section'].forEach((id) => hide($(id)));
+    if (tab === 'technique' || tab === 'recipe') {
+      show($('feed-section'));
+      $('feed-title').textContent = tab === 'technique' ? 'Cooking Techniques' : 'Recipes & Dishes';
+      loadFeed(tab);
+    } else if (tab === 'mine') {
+      show($('mine-section'));
+      loadMyFiles();
+      loadMyReports();
+    } else if (tab === 'mod') {
+      show($('mod-section'));
+      loadModeration();
+    } else if (tab === 'admin') {
+      show($('admin-section'));
+      loadAdminUsers();
+    }
+  }
+
+  // ========================================================
+  // PUBLIC FEED
+  // ========================================================
+  async function loadFeed(category) {
+    const ul = $('feed-list');
+    ul.innerHTML = '<li class="text-gray-400 text-sm">Loading…</li>';
+
+    const { data, error } = await sb
+      .from('shared_files')
+      .select('id, user_id, file_name, file_path, category, created_at')
+      .eq('category', category)
+      .eq('is_public', true)
+      .eq('is_removed', false)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) { ul.innerHTML = `<li class="text-red-500 text-sm">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400 text-sm">Nothing here yet. Be the first to upload!</li>'; return; }
+
+    ul.innerHTML = '';
+    for (const f of data) {
+      const { data: urlData } = sb.storage.from('files').getPublicUrl(f.file_path);
+      const isMine = f.user_id === currentUser?.id;
+      const li = document.createElement('li');
+      li.className = 'border rounded-lg p-3 flex flex-col gap-2';
+      li.innerHTML = `
+        ${mediaTag(urlData.publicUrl, f.file_name)}
+        <div class="flex justify-between items-center gap-2">
+          <div class="text-xs text-gray-500">
+            ${esc(f.file_name)} · ${new Date(f.created_at).toLocaleDateString()}
+            ${isMine ? '<span class="ml-1 text-blue-600">(you)</span>' : ''}
+          </div>
+          <div class="flex gap-2 shrink-0">
+            ${isMine ? '' : `<button class="text-orange-600 text-xs hover:underline" onclick="reportFile('${f.id}')">Report</button>`}
+            ${isMine ? `<button class="text-red-500 text-xs hover:underline" onclick="deleteOwnFile('${f.id}','${esc(f.file_path)}')">Delete</button>` : ''}
+          </div>
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function uploadToFeed() {
+    const input = $('feed-file');
+    const titleInput = $('feed-title-input');
+    const msg = $('feed-upload-msg');
+    const file = input.files[0];
+    msg.textContent = '';
+    msg.className = 'text-sm';
+
+    if (!currentUser) return;
+    if (!file) { msg.textContent = 'Pick a file first.'; msg.className = 'text-red-500 text-sm'; return; }
+
+    const category = currentTab === 'technique' ? 'technique' : 'recipe';
+    const safeName = file.name.replace(/[^\w.\- ]+/g, '_');
+    const path = `${currentUser.id}/${Date.now()}_${safeName}`;
+
+    const { error: upErr } = await sb.storage.from('files').upload(path, file);
+    if (upErr) { msg.textContent = upErr.message; msg.className = 'text-red-500 text-sm'; return; }
+
+    const displayName = (titleInput.value || file.name).slice(0, 200);
+    const { error: dbErr } = await sb.from('shared_files').insert({
+      user_id: currentUser.id,
+      file_name: displayName,
+      file_path: path,
+      category,
+      is_public: true,
+    });
+    if (dbErr) {
+      await sb.storage.from('files').remove([path]);
+      msg.textContent = dbErr.message;
+      msg.className = 'text-red-500 text-sm';
+      return;
+    }
+
+    msg.textContent = 'Uploaded!';
+    msg.className = 'text-green-600 text-sm';
+    input.value = '';
+    titleInput.value = '';
+    await loadFeed(category);
+  }
+
+  // ========================================================
+  // MY FILES
+  // ========================================================
+  async function loadMyFiles() {
+    if (!currentUser) return;
+    const ul = $('file-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
+
+    const { data, error } = await sb
+      .from('shared_files')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No files yet.</li>'; return; }
+
+    ul.innerHTML = '';
+    for (const f of data) {
+      const { data: urlData } = sb.storage.from('files').getPublicUrl(f.file_path);
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border-b pb-2 gap-2';
+      li.innerHTML = `
+        <div class="truncate">
+          <a href="${urlData.publicUrl}" target="_blank" rel="noopener" class="text-blue-600 hover:underline">${esc(f.file_name)}</a>
+          <span class="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${esc(f.category)}</span>
+          ${f.is_removed ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">removed</span>' : ''}
+        </div>
+        <div class="flex gap-2 shrink-0">
+          ${f.is_removed ? '' : `<button class="text-orange-600 text-xs hover:underline" onclick="reportFile('${f.id}')">Report</button>`}
+          <button class="text-red-500 text-xs hover:underline" onclick="deleteOwnFile('${f.id}','${esc(f.file_path)}')">Delete</button>
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function deleteOwnFile(id, path) {
+    if (!confirm('Delete this file?')) return;
+    await sb.storage.from('files').remove([path]);
+    await sb.from('shared_files').delete().eq('id', id);
+    await loadMyFiles();
+    if (currentTab === 'technique' || currentTab === 'recipe') await loadFeed(currentTab);
+    if (isStaff()) await loadModeration();
+  }
+
+  // ========================================================
+  // REPORTING
+  // ========================================================
+  async function reportFile(fileId) {
+    if (!currentUser) return;
+    const reason = prompt('Why are you reporting this file? (1-500 chars)');
+    if (!reason) return;
+
+    const { error } = await sb.from('reports').insert({
+      file_id: fileId,
+      reporter_id: currentUser.id,
+      reason: reason.slice(0, 500),
+    });
+    if (error) alert(error.message);
+    else alert('Report submitted.');
+    if (currentTab === 'mine') await loadMyReports();
+  }
+
+  async function loadMyReports() {
+    if (!currentUser) return;
+    const ul = $('my-reports-list');
+    ul.innerHTML = '';
+    const { data, error } = await sb
+      .from('reports')
+      .select('id, reason, status, created_at, file_id, shared_files(file_name)')
+      .eq('reporter_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No reports.</li>'; return; }
+
+    for (const r of data) {
+      const li = document.createElement('li');
+      li.className = 'border-b pb-2';
+      const badge = r.status === 'open'
+        ? 'bg-yellow-100 text-yellow-800'
+        : r.status === 'resolved'
+        ? 'bg-green-100 text-green-800'
+        : 'bg-gray-200 text-gray-700';
+      li.innerHTML = `
+        <div class="font-medium">${esc(r.shared_files?.file_name ?? r.file_id)}</div>
+        <div class="text-gray-600">${esc(r.reason)}</div>
+        <div class="text-xs mt-1"><span class="px-2 py-0.5 rounded ${badge}">${esc(r.status)}</span></div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  // ========================================================
+  // MODERATION
+  // ========================================================
+  async function loadModeration() {
+    if (!isStaff()) return;
+    $('mod-role').textContent = currentProfile.role;
+    await Promise.all([loadOpenReports(), loadAllFilesForStaff()]);
+  }
+
+  async function loadOpenReports() {
+    const ul = $('reports-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
+    const { data, error } = await sb
+      .from('reports')
+      .select('id, reason, status, file_id, reporter_id, created_at, shared_files(file_name, file_path, user_id, is_removed)')
+      .eq('status', 'open')
+      .order('created_at', { ascending: true });
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No open reports.</li>'; return; }
+
+    ul.innerHTML = '';
+    for (const r of data) {
+      const authorId = r.shared_files?.user_id ?? '';
+      const li = document.createElement('li');
+      li.className = 'border-b pb-2';
+      li.innerHTML = `
+        <div class="font-medium">${esc(r.shared_files?.file_name ?? r.file_id)}</div>
+        <div class="text-gray-600">${esc(r.reason)}</div>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <button class="bg-red-600 text-white px-2 py-1 rounded text-xs" onclick="removeFileAsStaff('${r.file_id}','${r.id}')">Remove post</button>
+          <button class="bg-gray-600 text-white px-2 py-1 rounded text-xs" onclick="resolveReport('${r.id}','dismissed')">Dismiss</button>
+          ${authorId ? `<button class="bg-yellow-600 text-white px-2 py-1 rounded text-xs" onclick="banUser('${authorId}')">Ban author</button>` : ''}
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function loadAllFilesForStaff() {
+    const ul = $('all-files-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
+    const { data, error } = await sb
+      .from('shared_files')
+      .select('id, file_name, file_path, user_id, category, is_removed, created_at')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    if (!data.length) { ul.innerHTML = '<li class="text-gray-400">No files.</li>'; return; }
+
+    ul.innerHTML = '';
+    for (const f of data) {
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border-b pb-2 gap-2';
+      li.innerHTML = `
+        <div class="truncate">
+          ${esc(f.file_name)}
+          <span class="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${esc(f.category)}</span>
+          ${f.is_removed ? '<span class="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">removed</span>' : ''}
+        </div>
+        <div class="flex gap-2 shrink-0">
+          ${f.is_removed ? '' : `<button class="text-red-600 text-xs hover:underline" onclick="removeFileAsStaff('${f.id}', null)">Remove</button>`}
+          <button class="text-yellow-700 text-xs hover:underline" onclick="banUser('${f.user_id}')">Ban author</button>
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function removeFileAsStaff(fileId, reportId) {
+    if (!confirm('Remove this post? The file will be deleted from storage.')) return;
+
+    const { error: updErr } = await sb
+      .from('shared_files')
+      .update({
+        is_removed: true,
+        removed_at: new Date().toISOString(),
+        removed_by: currentUser.id,
+      })
+      .eq('id', fileId);
+    if (updErr) { alert(updErr.message); return; }
+
+    const { data: row } = await sb.from('shared_files').select('file_path').eq('id', fileId).single();
+    if (row?.file_path) await sb.storage.from('files').remove([row.file_path]);
+
+    if (reportId) await resolveReport(reportId, 'resolved');
+
+    await loadModeration();
+    if (currentTab === 'technique' || currentTab === 'recipe') await loadFeed(currentTab);
+  }
+
+  async function resolveReport(reportId, status) {
+    const { error } = await sb
+      .from('reports')
+      .update({ status, resolved_by: currentUser.id, resolved_at: new Date().toISOString() })
+      .eq('id', reportId);
+    if (error) alert(error.message);
+    await loadOpenReports();
+  }
+
+  async function banUser(userId) {
+    if (!userId) return;
+    if (!confirm('Ban this user? They will not be able to upload or report.')) return;
+    const { error } = await sb
+      .from('profiles')
+      .update({ is_banned: true, banned_at: new Date().toISOString(), banned_by: currentUser.id })
+      .eq('id', userId);
+    if (error) alert(error.message);
+    else alert('User banned.');
+    if (isAdmin()) await loadAdminUsers();
+  }
+
+  // ========================================================
+  // ADMIN
+  // ========================================================
+  async function loadAdminUsers() {
+    if (!isAdmin()) return;
+    const ul = $('users-list');
+    ul.innerHTML = '<li class="text-gray-400">Loading…</li>';
+    const { data, error } = await sb
+      .from('profiles')
+      .select('id, email, role, is_banned, created_at')
+      .order('created_at', { ascending: true });
+
+    if (error) { ul.innerHTML = `<li class="text-red-500">${esc(error.message)}</li>`; return; }
+    ul.innerHTML = '';
+    for (const u of data) {
+      const isSelf = u.id === currentUser.id;
+      const roleBtn = (role, label, cls) =>
+        u.role === role || (role === 'moderator' && u.role === 'admin')
+          ? ''
+          : `<button class="${cls} text-xs hover:underline" onclick="setRole('${u.id}','${role}')">${label}</button>`;
+      const banBtn = u.is_banned
+        ? `<button class="text-green-600 text-xs hover:underline" onclick="unbanUser('${u.id}')">Unban</button>`
+        : `<button class="text-red-600 text-xs hover:underline" onclick="banUser('${u.id}')">Ban</button>`;
+
+      const li = document.createElement('li');
+      li.className = 'flex justify-between items-center border-b pb-2 gap-2';
+      li.innerHTML = `
+        <div class="truncate">
+          <span class="font-medium">${esc(u.email ?? u.id)}</span>
+          <span class="ml-2 text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${esc(u.role)}</span>
+          ${u.is_banned ? '<span class="ml-1 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">banned</span>' : ''}
+          ${isSelf ? '<span class="ml-1 text-xs text-gray-400">(you)</span>' : ''}
+        </div>
+        <div class="flex flex-wrap gap-2 shrink-0 justify-end">
+          ${isSelf ? '' : roleBtn('user', 'Make user', 'text-gray-600')}
+          ${isSelf ? '' : roleBtn('moderator', 'Make mod', 'text-purple-600')}
+          ${isSelf ? '' : roleBtn('admin', 'Make admin', 'text-indigo-600')}
+          ${isSelf ? '' : banBtn}
+        </div>`;
+      ul.appendChild(li);
+    }
+  }
+
+  async function setRole(userId, role) {
+    if (!isAdmin()) return;
+    if (!confirm(`Set this user's role to "${role}"?`)) return;
+    const { error } = await sb.from('profiles').update({ role }).eq('id', userId);
+    if (error) alert(error.message);
+    else alert('Role updated.');
+    await loadAdminUsers();
+  }
+
+  async function unbanUser(userId) {
+    if (!isAdmin()) return;
+    if (!confirm('Unban this user?')) return;
+    const { error } = await sb
+      .from('profiles')
+      .update({ is_banned: false, banned_at: null, banned_by: null })
+      .eq('id', userId);
+    if (error) alert(error.message);
+    else alert('User unbanned.');
+    await loadAdminUsers();
+  }
+
+  // ========================================================
+  // REFRESH / BOOT
+  // ========================================================
+  async function loadProfile() {
+    if (!currentUser) { currentProfile = null; return; }
+    const { data, error } = await sb
+      .from('profiles')
+      .select('id, email, role, is_banned')
+      .eq('id', currentUser.id)
+      .single();
+    if (error) { console.warn('profile load failed', error); currentProfile = null; }
+    else currentProfile = data;
+  }
+
+  async function refresh() {
+    const { data: { user } } = await sb.auth.getUser();
+    currentUser = user || null;
+    await loadProfile();
+
+    const authSection = $('auth-section');
+    const tabs = $('tabs');
+    const bannedBanner = $('banned-banner');
+    const userBadge = $('user-badge');
+
+    if (currentUser && currentProfile) {
+      hide(authSection);
+      show(tabs);
+      userBadge.textContent = `${currentProfile.email ?? currentUser.email} — ${currentProfile.role}`;
+      show(userBadge);
+
+      if (currentProfile.is_banned) show(bannedBanner);
+      else hide(bannedBanner);
+
+      document.querySelectorAll('.tab-btn[data-tab="mod"]').forEach((b) => {
+        if (isStaff()) show(b); else hide(b);
+      });
+      document.querySelectorAll('.tab-btn[data-tab="admin"]').forEach((b) => {
+        if (isAdmin()) show(b); else hide(b);
+      });
+
+      const feedUpload = $('feed-upload');
+      if (currentProfile.is_banned) hide(feedUpload); else show(feedUpload);
+
+      if ((currentTab === 'mod' && !isStaff()) || (currentTab === 'admin' && !isAdmin())) {
+        currentTab = 'technique';
+      }
+      setTab(currentTab);
+    } else {
+      show(authSection);
+      hide(tabs);
+      ['feed-section','mine-section','mod-section','admin-section'].forEach((id) => hide($(id)));
+      hide(userBadge);
+      hide(bannedBanner);
+    }
+  }
+
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setTab(btn.dataset.tab));
+  });
+  $('feed-upload-btn').addEventListener('click', uploadToFeed);
+
   sb.auth.onAuthStateChange(() => { refresh(); });
   refresh();
 </script>
